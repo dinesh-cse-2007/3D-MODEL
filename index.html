@@ -1,0 +1,3866 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FITOUT — Commercial Space Planner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+         :root {
+            --paper: #1fb362;
+            --paper2: #000000;
+            --oat: #626e593f;
+            --oat2: #D9CFB6;
+            --ink: #26231C;
+            --ink2: #080808;
+            --line: rgba(38, 35, 28, .14);
+            --line2: rgba(38, 35, 28, .08);
+            --brand: #C4502B;
+            --green: #030303;
+            --red: #0c0b0b;
+            --sg: 'Space Grotesk', sans-serif;
+            --ps: 'IBM Plex Sans', sans-serif;
+            --pm: 'IBM Plex Mono', monospace;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+        
+        html,
+        body {
+            height: 100%;
+            overflow: hidden
+        }
+        
+        body {
+            font-family: var(--ps);
+            color: var(--ink);
+            background: var(--paper);
+            background-image: linear-gradient(rgba(38, 35, 28, .045) 1px, transparent 1px), linear-gradient(90deg, rgba(38, 35, 28, .045) 1px, transparent 1px), linear-gradient(rgba(38, 35, 28, .07) 1px, transparent 1px), linear-gradient(90deg, rgba(38, 35, 28, .07) 1px, transparent 1px);
+            background-size: 24px 24px, 24px 24px, 120px 120px, 120px 120px;
+        }
+        
+        #app {
+            display: grid;
+            grid-template-rows: 56px 1fr;
+            height: 100%
+        }
+        /* ---------- top bar ---------- */
+        
+        #topbar {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 0 16px;
+            background: var(--paper2);
+            border-bottom: 1px solid var(--line);
+            position: relative;
+            z-index: 30
+        }
+        
+        .wordmark {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-right: 6px
+        }
+        
+        .mark {
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--ink);
+            position: relative;
+            flex: none
+        }
+        
+        .mark::after {
+            content: '';
+            position: absolute;
+            right: -4px;
+            bottom: -4px;
+            width: 9px;
+            height: 9px;
+            background: var(--brand);
+            transition: background .3s
+        }
+        
+        .wordmark b {
+            font-family: var(--sg);
+            font-weight: 700;
+            font-size: 19px;
+            letter-spacing: -.02em
+        }
+        
+        .wordmark span {
+            font-family: var(--pm);
+            font-size: 10px;
+            color: var(--ink2);
+            letter-spacing: .14em;
+            margin-top: 4px
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-family: var(--ps);
+            font-weight: 500;
+            font-size: 13px;
+            color: var(--ink);
+            background: var(--paper2);
+            border: 1px solid var(--line);
+            border-radius: 9px;
+            padding: 7px 12px;
+            cursor: pointer;
+            transition: background .15s, color .15s, border-color .15s;
+            white-space: nowrap
+        }
+        
+        .btn:hover {
+            border-color: var(--ink)
+        }
+        
+        .btn svg {
+            width: 15px;
+            height: 15px
+        }
+        
+        .btn.primary {
+            background: var(--ink);
+            color: var(--paper2);
+            border-color: var(--ink)
+        }
+        
+        .btn.primary:hover {
+            background: #000
+        }
+        
+        .btn.active {
+            background: var(--ink);
+            color: var(--paper2);
+            border-color: var(--ink)
+        }
+        
+        .btn.fire-on {
+            background: var(--green);
+            border-color: var(--green);
+            color: #fff
+        }
+        
+        .seg {
+            display: flex;
+            border: 1px solid var(--line);
+            border-radius: 9px;
+            overflow: hidden;
+            background: var(--paper2)
+        }
+        
+        .seg button {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--ps);
+            font-weight: 500;
+            font-size: 13px;
+            border: 0;
+            background: transparent;
+            color: var(--ink2);
+            padding: 7px 14px;
+            cursor: pointer;
+            transition: .15s
+        }
+        
+        .seg button svg {
+            width: 14px;
+            height: 14px
+        }
+        
+        .seg button.on {
+            background: var(--ink);
+            color: var(--paper2)
+        }
+        
+        .spacer {
+            flex: 1
+        }
+        
+        .swatchdot {
+            width: 14px;
+            height: 14px;
+            border-radius: 4px;
+            background: var(--brand);
+            border: 1px solid rgba(0, 0, 0, .15);
+            transition: background .3s
+        }
+        
+        .anchor {
+            position: relative
+        }
+        
+        .pop {
+            position: absolute;
+            top: calc(100% + 10px);
+            background: var(--paper2);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            box-shadow: 0 14px 40px rgba(30, 26, 18, .16);
+            padding: 14px;
+            display: none;
+            z-index: 60
+        }
+        
+        .pop.open {
+            display: block
+        }
+        
+        .pop.left0 {
+            left: 0
+        }
+        
+        .pop.right0 {
+            right: 0
+        }
+        
+        .pop h4 {
+            font-family: var(--pm);
+            font-size: 10px;
+            letter-spacing: .16em;
+            color: var(--ink2);
+            font-weight: 500;
+            margin-bottom: 10px
+        }
+        
+        .swatches {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px
+        }
+        
+        .swatches button {
+            width: 26px;
+            height: 26px;
+            border-radius: 7px;
+            border: 1px solid rgba(0, 0, 0, .12);
+            cursor: pointer;
+            transition: transform .12s
+        }
+        
+        .swatches button:hover {
+            transform: scale(1.12)
+        }
+        
+        .customrow {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--ink2)
+        }
+        
+        .customrow input[type=color] {
+            width: 34px;
+            height: 26px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background: none;
+            cursor: pointer;
+            padding: 1px
+        }
+        
+        .tplgrid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            width: 480px
+        }
+        
+        .tcard {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            background: var(--paper);
+            transition: border-color .15s, transform .15s;
+            text-align: left;
+            padding: 0
+        }
+        
+        .tcard:hover {
+            border-color: var(--ink);
+            transform: translateY(-2px)
+        }
+        
+        .tcard .ph {
+            position: relative;
+            height: 110px;
+            overflow: hidden
+        }
+        
+        .tcard img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(1) contrast(1.06) brightness(.94) sepia(.28);
+            display: block
+        }
+        
+        .tcard .ph::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(38, 35, 28, .14);
+            mix-blend-mode: multiply
+        }
+        
+        .tcard .meta {
+            padding: 9px 11px
+        }
+        
+        .tcard .meta b {
+            font-family: var(--sg);
+            font-size: 14px;
+            display: block
+        }
+        
+        .tcard .meta span {
+            font-family: var(--pm);
+            font-size: 10.5px;
+            color: var(--ink2)
+        }
+        
+        .tcard.now {
+            border-color: var(--brand);
+            box-shadow: 0 0 0 1px var(--brand)
+        }
+        
+        .tcard.now .meta b::after {
+            content: ' · CURRENT';
+            font-family: var(--pm);
+            font-size: 9px;
+            color: var(--brand);
+            letter-spacing: .1em
+        }
+        /* ---------- main ---------- */
+        
+        #main {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 0
+        }
+        
+        #library {
+            background: var(--paper2);
+            border-right: 1px solid var(--line);
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            z-index: 20
+        }
+        
+        #library .head {
+            padding: 14px 14px 8px
+        }
+        
+        #library .head h3 {
+            font-family: var(--pm);
+            font-size: 10px;
+            letter-spacing: .18em;
+            color: var(--ink2);
+            font-weight: 500
+        }
+        
+        #toolSelect {
+            margin: 4px 12px 10px;
+            justify-content: center
+        }
+        
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            padding: 0 12px 10px;
+            border-bottom: 1px solid var(--line2)
+        }
+        
+        .chip {
+            font-family: var(--pm);
+            font-size: 10.5px;
+            padding: 4px 9px;
+            border: 1px solid var(--line);
+            border-radius: 99px;
+            background: transparent;
+            color: var(--ink2);
+            cursor: pointer;
+            transition: .12s
+        }
+        
+        .chip:hover {
+            border-color: var(--ink);
+            color: var(--ink)
+        }
+        
+        .chip.on {
+            background: var(--ink);
+            color: var(--paper2);
+            border-color: var(--ink)
+        }
+        
+        #itemList {
+            overflow-y: auto;
+            flex: 1;
+            padding: 8px 8px 16px
+        }
+        
+        .irow {
+            display: grid;
+            grid-template-columns: 46px 1fr auto;
+            gap: 10px;
+            align-items: center;
+            padding: 7px 8px;
+            border-radius: 9px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: .12s
+        }
+        
+        .irow:hover {
+            background: var(--paper);
+            border-color: var(--line)
+        }
+        
+        .irow.active {
+            border-color: var(--brand);
+            box-shadow: 0 0 0 1px var(--brand)
+        }
+        
+        .irow img {
+            width: 44px;
+            height: 44px
+        }
+        
+        .irow .nm {
+            font-size: 13px;
+            font-weight: 500;
+            line-height: 1.2
+        }
+        
+        .irow .ct {
+            font-family: var(--pm);
+            font-size: 9.5px;
+            color: var(--ink2);
+            letter-spacing: .08em
+        }
+        
+        .irow .pr {
+            font-family: var(--pm);
+            font-size: 11.5px;
+            color: var(--ink2)
+        }
+        /* ---------- viewport ---------- */
+        
+        #viewport {
+            position: relative;
+            min-width: 0;
+            min-height: 0
+        }
+        
+        #stage {
+            position: absolute;
+            inset: 0
+        }
+        
+        #stage canvas {
+            display: block
+        }
+        
+        .ov {
+            position: absolute;
+            pointer-events: none;
+            z-index: 10
+        }
+        
+        .ov * {
+            pointer-events: auto
+        }
+        
+        #welcome {
+            top: 18px;
+            left: 18px;
+            max-width: 300px;
+            background: rgba(251, 249, 243, .94);
+            backdrop-filter: blur(6px);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 18px;
+            box-shadow: 0 10px 34px rgba(30, 26, 18, .12);
+            transition: opacity .5s, transform .5s
+        }
+        
+        #welcome.hide {
+            opacity: 0;
+            transform: translateY(-8px);
+            pointer-events: none!important
+        }
+        
+        #welcome .k {
+            font-family: var(--pm);
+            font-size: 10px;
+            letter-spacing: .18em;
+            color: var(--brand);
+            font-weight: 500;
+            transition: color .3s
+        }
+        
+        #welcome h1 {
+            font-family: var(--sg);
+            font-weight: 700;
+            font-size: 23px;
+            letter-spacing: -.02em;
+            line-height: 1.1;
+            margin: 6px 0 8px
+        }
+        
+        #welcome p {
+            font-size: 13px;
+            line-height: 1.55;
+            color: var(--ink2)
+        }
+        
+        #welcome .btn {
+            margin-top: 12px
+        }
+        
+        #hud {
+            left: 18px;
+            bottom: 18px;
+            width: 270px;
+            background: rgba(251, 249, 243, .94);
+            backdrop-filter: blur(6px);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 14px 16px;
+            box-shadow: 0 10px 34px rgba(30, 26, 18, .12)
+        }
+        
+        #hud .rl {
+            display: flex;
+            justify-content: space-between;
+            font-family: var(--pm);
+            font-size: 9.5px;
+            letter-spacing: .14em;
+            color: var(--ink2);
+            margin-bottom: 8px
+        }
+        
+        #seatsRow {
+            display: flex;
+            align-items: baseline;
+            gap: 8px
+        }
+        
+        #seatsN {
+            font-family: var(--sg);
+            font-weight: 700;
+            font-size: 38px;
+            line-height: 1;
+            letter-spacing: -.02em
+        }
+        
+        #seatsRow small {
+            font-family: var(--pm);
+            font-size: 11px;
+            color: var(--ink2)
+        }
+        
+        .meter {
+            position: relative;
+            height: 9px;
+            background: var(--oat);
+            border-radius: 99px;
+            margin: 10px 0 4px;
+            overflow: hidden
+        }
+        
+        .meter::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(90deg, transparent 0 10%, rgba(38, 35, 28, .18) 10% calc(10% + 1px))
+        }
+        
+        #meterFill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            background: var(--brand);
+            border-radius: 99px;
+            transition: background .3s;
+            width: 0
+        }
+        
+        .meter.over #meterFill {
+            background: var(--red)
+        }
+        
+        #hud .mono {
+            font-family: var(--pm);
+            font-size: 11px;
+            color: var(--ink2);
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3px
+        }
+        
+        #verdict {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--line2);
+            font-size: 12px;
+            font-weight: 500
+        }
+        
+        #verdict .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            flex: none
+        }
+        
+        #verdict.bad .dot {
+            background: var(--red)
+        }
+        
+        #verdict small {
+            margin-left: auto;
+            font-family: var(--pm);
+            font-size: 10px;
+            color: var(--ink2)
+        }
+        
+        #hint {
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--ink);
+            color: var(--paper2);
+            font-size: 12.5px;
+            padding: 8px 16px;
+            border-radius: 99px;
+            display: none;
+            box-shadow: 0 8px 24px rgba(30, 26, 18, .25)
+        }
+        
+        #hint kbd {
+            font-family: var(--pm);
+            font-size: 10.5px;
+            background: rgba(255, 255, 255, .16);
+            border-radius: 4px;
+            padding: 1px 5px;
+            margin: 0 2px
+        }
+        
+        #selPill {
+            bottom: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--ink);
+            color: var(--paper2);
+            display: none;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 8px 6px 15px;
+            border-radius: 99px;
+            box-shadow: 0 8px 24px rgba(30, 26, 18, .25)
+        }
+        
+        #selPill .nm {
+            font-size: 13px;
+            font-weight: 500;
+            margin-right: 4px
+        }
+        
+        #selPill .pr {
+            font-family: var(--pm);
+            font-size: 11px;
+            opacity: .7;
+            margin-right: 8px
+        }
+        
+        #selPill button {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: transparent;
+            border: 0;
+            color: var(--paper2);
+            font-size: 12px;
+            padding: 6px 9px;
+            border-radius: 99px;
+            cursor: pointer;
+            transition: background .15s;
+            font-family: var(--ps)
+        }
+        
+        #selPill button:hover {
+            background: rgba(255, 255, 255, .14)
+        }
+        
+        #selPill button.del:hover {
+            background: var(--red)
+        }
+        
+        #selPill svg {
+            width: 14px;
+            height: 14px
+        }
+        
+        #toasts {
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center
+        }
+        
+        .toast {
+            background: var(--ink);
+            color: var(--paper2);
+            font-size: 12.5px;
+            padding: 9px 16px;
+            border-radius: 9px;
+            box-shadow: 0 8px 24px rgba(30, 26, 18, .25);
+            animation: tin .3s ease
+        }
+        
+        @keyframes tin {
+            from {
+                opacity: 0;
+                transform: translateY(-8px)
+            }
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+        
+        @keyframes bump {
+            0% {
+                transform: scale(1)
+            }
+            35% {
+                transform: scale(1.14)
+            }
+            100% {
+                transform: scale(1)
+            }
+        }
+        
+        .bump {
+            animation: bump .28s ease
+        }
+        /* ---------- cost panel ---------- */
+        
+        #cost {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 340px;
+            background: var(--paper2);
+            border-left: 1px solid var(--line);
+            box-shadow: -16px 0 40px rgba(30, 26, 18, .10);
+            transform: translateX(105%);
+            transition: transform .5s cubic-bezier(.22, .8, .24, 1);
+            z-index: 25;
+            display: flex;
+            flex-direction: column
+        }
+        
+        #cost.open {
+            transform: none
+        }
+        
+        #cost .ch {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 20px 12px
+        }
+        
+        #cost .ch h3 {
+            font-family: var(--sg);
+            font-weight: 600;
+            font-size: 17px;
+            letter-spacing: -.01em
+        }
+        
+        #cost .ch span {
+            font-family: var(--pm);
+            font-size: 10px;
+            color: var(--ink2);
+            letter-spacing: .14em;
+            display: block;
+            margin-top: 2px
+        }
+        
+        #cost .ch button {
+            background: none;
+            border: 0;
+            cursor: pointer;
+            color: var(--ink2);
+            padding: 4px
+        }
+        
+        #cost .ch button:hover {
+            color: var(--ink)
+        }
+        
+        #costBody {
+            flex: 1;
+            overflow-y: auto;
+            padding: 4px 20px
+        }
+        
+        .crow {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: 12.5px;
+            padding: 7px 0;
+            border-bottom: 1px solid var(--line2)
+        }
+        
+        .crow .l b {
+            font-weight: 500;
+            display: block
+        }
+        
+        .crow .l span {
+            font-family: var(--pm);
+            font-size: 10px;
+            color: var(--ink2)
+        }
+        
+        .crow .r {
+            font-family: var(--pm);
+            font-size: 12px;
+            white-space: nowrap
+        }
+        
+        .crow.fix .l b {
+            color: var(--ink2);
+            font-size: 12px
+        }
+        
+        #costTotal {
+            padding: 14px 20px 18px;
+            border-top: 1px solid var(--line)
+        }
+        
+        #costTotal .tl {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline
+        }
+        
+        #costTotal .tl span {
+            font-family: var(--pm);
+            font-size: 10px;
+            letter-spacing: .16em;
+            color: var(--ink2)
+        }
+        
+        #costTotal .tl b {
+            font-family: var(--sg);
+            font-size: 26px;
+            letter-spacing: -.02em
+        }
+        
+        #costTotal .note {
+            font-size: 11px;
+            color: var(--ink2);
+            margin-top: 6px
+        }
+        /* ---------- export overlay ---------- */
+        
+        #export {
+            position: fixed;
+            inset: 0;
+            background: rgba(24, 22, 16, .58);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 14px
+        }
+        
+        #export.open {
+            display: flex
+        }
+        
+        #export .bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--paper2)
+        }
+        
+        #export .bar b {
+            font-family: var(--sg);
+            font-size: 15px
+        }
+        
+        #export .bar span {
+            font-family: var(--pm);
+            font-size: 11px;
+            opacity: .75
+        }
+        
+        #sheetWrap {
+            background: #FBF8F1;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, .4);
+            border-radius: 4px;
+            overflow: hidden
+        }
+        
+        #sheet {
+            display: block;
+            max-width: min(88vw, 1180px);
+            max-height: 76vh;
+            width: auto;
+            height: auto
+        }
+        
+        @media (max-width:900px) {
+            #library {
+                position: absolute;
+                left: 0;
+                top: 56px;
+                bottom: 0;
+                transform: translateX(-100%);
+                transition: .3s
+            }
+            #library.open {
+                transform: none
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <header id="topbar">
+            <div class="wordmark">
+                <div class="mark"></div>
+                <div><b>FITOUT</b><br><span>SPACE PLANNER</span></div>
+            </div>
+
+            <div class="anchor">
+                <button class="btn" id="btnTpl"><i data-lucide="layout-template"></i>Templates</button>
+                <div class="pop left0" id="popTpl">
+                    <h4>START FROM A TEMPLATE</h4>
+                    <div class="tplgrid" id="tplGrid"></div>
+                </div>
+            </div>
+
+            <div class="seg" id="viewSeg">
+                <button data-v="plan" class="on"><i data-lucide="map"></i>Plan</button>
+                <button data-v="p3d"><i data-lucide="box"></i>3D</button>
+            </div>
+
+            <div class="spacer"></div>
+
+            <button class="btn" id="btnFire" title="Show fire safety"><i data-lucide="flame"></i>Fire safety</button>
+            <button class="btn" id="btnUndo" title="Undo (Ctrl+Z)"><i data-lucide="undo-2"></i></button>
+
+            <div class="anchor">
+                <button class="btn" id="btnBrand"><span class="swatchdot"></span>Brand</button>
+                <div class="pop right0" id="popBrand" style="width:220px">
+                    <h4>SIGNATURE BRAND COLOR</h4>
+                    <div class="swatches" id="swatches"></div>
+                    <div class="customrow"><input type="color" id="brandInput" value="#C4502B"><span>Pick any color — applied live</span></div>
+                </div>
+            </div>
+
+            <button class="btn" id="btnCost"><i data-lucide="receipt"></i>Costs</button>
+            <button class="btn primary" id="btnExport"><i data-lucide="file-down"></i>Export PDF</button>
+        </header>
+
+        <div id="main">
+            <aside id="library">
+                <div class="head">
+                    <h3>FURNITURE LIBRARY</h3>
+                </div>
+                <button class="btn" id="toolSelect"><i data-lucide="mouse-pointer-2"></i>Select / move</button>
+                <div class="chips" id="chips"></div>
+                <div id="itemList"></div>
+            </aside>
+
+            <main id="viewport">
+                <div id="stage"></div>
+
+                <div class="ov" id="welcome">
+                    <div class="k">COMMERCIAL SPACE PLANNER</div>
+                    <h1>Plan the room before you sign the lease.</h1>
+                    <p>Pick furniture from the library and drop it onto the floor. Set your brand color, watch capacity and fire egress update live, then export a pricing sheet.</p>
+                    <button class="btn primary" id="btnGotIt">Start planning</button>
+                </div>
+
+                <div class="ov" id="hud">
+                    <div class="rl"><span id="roomLabel">CAFÉ</span><span>LIVE CAPACITY</span></div>
+                    <div id="seatsRow"><span id="seatsN">0</span><small id="seatsMax">/ — max occupancy</small></div>
+                    <div class="meter" id="meter">
+                        <div id="meterFill"></div>
+                    </div>
+                    <div class="mono"><span id="m2seat">— m² / seat</span><span id="p100">— seats / 100 m²</span></div>
+                    <div id="verdict"><span class="dot"></span><span id="verdictTxt">No seating yet</span><small id="egressTxt">—</small></div>
+                </div>
+
+                <div class="ov" id="hint"></div>
+
+                <div class="ov" id="selPill">
+                    <span class="nm" id="selName"></span><span class="pr" id="selPrice"></span>
+                    <button id="aRot"><i data-lucide="rotate-cw"></i>Rotate</button>
+                    <button id="aDup"><i data-lucide="copy"></i>Duplicate</button>
+                    <button class="del" id="aDel"><i data-lucide="trash-2"></i>Delete</button>
+                </div>
+
+                <div class="ov" id="toasts"></div>
+
+                <aside id="cost">
+                    <div class="ch">
+                        <div>
+                            <h3>Cost estimate</h3><span>BUDGETARY · UPDATED LIVE</span></div><button id="costClose"><i data-lucide="x"></i></button></div>
+                    <div id="costBody"></div>
+                    <div id="costTotal">
+                        <div class="tl"><span>PROJECT TOTAL</span><b id="totalN">$0</b></div>
+                        <div class="note">Indicative pricing for early feasibility. Excludes permits, MEP design and tax.</div>
+                    </div>
+                </aside>
+            </main>
+        </div>
+    </div>
+
+    <div id="export">
+        <div class="bar"><b>Layout sheet A-101</b><span id="expStatus">preparing…</span></div>
+        <div id="sheetWrap"><canvas id="sheet"></canvas></div>
+        <div class="bar">
+            <button class="btn primary" id="btnPdf" disabled><i data-lucide="download"></i>Download PDF</button>
+            <button class="btn" id="btnCloseExp" style="color:#F6F2E9;border-color:rgba(246,242,233,.4);background:transparent">Close</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.294.0/dist/umd/lucide.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        (function() {
+            'use strict';
+            const $ = id => document.getElementById(id);
+            const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+            const lerp = (a, b, t) => a + (b - a) * t;
+            const easeIO = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+            const easeOB = t => {
+                const c = 1.7;
+                return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2);
+            };
+            const fmt$ = n => '$' + Math.round(n).toLocaleString('en-US');
+
+            /* ============ CATALOG ============ */
+            const CATALOG = {
+                chair: {
+                    name: 'Café chair',
+                    cat: 'Seating',
+                    w: .5,
+                    d: .5,
+                    h: .85,
+                    cost: 85,
+                    seats: 1,
+                    kind: 'chair'
+                },
+                stool: {
+                    name: 'Bar stool',
+                    cat: 'Seating',
+                    w: .4,
+                    d: .4,
+                    h: .78,
+                    cost: 120,
+                    seats: 1,
+                    kind: 'stool'
+                },
+                banquette: {
+                    name: 'Banquette',
+                    cat: 'Seating',
+                    w: 1.5,
+                    d: .7,
+                    h: .9,
+                    cost: 980,
+                    seats: 2,
+                    kind: 'seat'
+                },
+                booth: {
+                    name: 'Booth set',
+                    cat: 'Seating',
+                    w: 1.9,
+                    d: 1.9,
+                    h: 1.15,
+                    cost: 1450,
+                    seats: 4,
+                    kind: 'booth'
+                },
+                tableR: {
+                    name: 'Round table Ø70',
+                    cat: 'Tables',
+                    w: .7,
+                    d: .7,
+                    h: .75,
+                    cost: 240,
+                    seats: 0,
+                    kind: 'circ'
+                },
+                tableS: {
+                    name: 'Square table 80',
+                    cat: 'Tables',
+                    w: .8,
+                    d: .8,
+                    h: .75,
+                    cost: 210,
+                    seats: 0,
+                    kind: 'rect'
+                },
+                communal: {
+                    name: 'Communal table',
+                    cat: 'Tables',
+                    w: 2.4,
+                    d: .9,
+                    h: .75,
+                    cost: 760,
+                    seats: 0,
+                    kind: 'rect'
+                },
+                counter: {
+                    name: 'Service counter',
+                    cat: 'Counters',
+                    w: 2.4,
+                    d: .7,
+                    h: .95,
+                    cost: 2400,
+                    seats: 0,
+                    kind: 'counter'
+                },
+                espresso: {
+                    name: 'Espresso station',
+                    cat: 'Counters',
+                    w: 1.2,
+                    d: .7,
+                    h: 1.35,
+                    cost: 6500,
+                    seats: 0,
+                    kind: 'counter'
+                },
+                pos: {
+                    name: 'POS counter',
+                    cat: 'Counters',
+                    w: 1.0,
+                    d: .6,
+                    h: 1.15,
+                    cost: 850,
+                    seats: 0,
+                    kind: 'counter'
+                },
+                shelf: {
+                    name: 'Shelf unit',
+                    cat: 'Retail',
+                    w: 1.8,
+                    d: .4,
+                    h: 2.1,
+                    cost: 1300,
+                    seats: 0,
+                    kind: 'shelf'
+                },
+                display: {
+                    name: 'Display table',
+                    cat: 'Retail',
+                    w: 1.2,
+                    d: .8,
+                    h: .8,
+                    cost: 540,
+                    seats: 0,
+                    kind: 'rect'
+                },
+                rack: {
+                    name: 'Clothing rack',
+                    cat: 'Retail',
+                    w: 1.2,
+                    d: .5,
+                    h: 1.6,
+                    cost: 320,
+                    seats: 0,
+                    kind: 'rack'
+                },
+                screen: {
+                    name: 'Felt screen',
+                    cat: 'Decor',
+                    w: 1.6,
+                    d: .12,
+                    h: 1.5,
+                    cost: 420,
+                    seats: 0,
+                    kind: 'thin'
+                },
+                planter: {
+                    name: 'Planter',
+                    cat: 'Decor',
+                    w: .6,
+                    d: .6,
+                    h: 1.7,
+                    cost: 180,
+                    seats: 0,
+                    kind: 'plant'
+                },
+            };
+            const CATS = ['All', 'Seating', 'Tables', 'Counters', 'Retail', 'Decor'];
+
+            /* ============ THREE SETUP ============ */
+            const stage = $('stage');
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xF3EEE3);
+            scene.fog = new THREE.Fog(0xF3EEE3, 34, 95);
+            const camera = new THREE.PerspectiveCamera(42, 1, .1, 220);
+            const renderer = new THREE.WebGLRenderer({
+                antialias: true
+            });
+            renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            stage.appendChild(renderer.domElement);
+            renderer.domElement.addEventListener('contextmenu', e => e.preventDefault());
+
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = .09;
+            controls.maxPolarAngle = 1.45;
+            controls.minDistance = 2.5;
+            controls.maxDistance = 48;
+
+            const hemi = new THREE.HemisphereLight(0xFFF6E6, 0xD8CDB4, .85);
+            scene.add(hemi);
+            const dir = new THREE.DirectionalLight(0xFFF1DA, .8);
+            dir.position.set(9, 15, 7);
+            dir.castShadow = true;
+            dir.shadow.mapSize.set(2048, 2048);
+            dir.shadow.bias = -0.0006;
+            scene.add(dir);
+
+            function resize() {
+                const w = stage.clientWidth,
+                    h = stage.clientHeight;
+                camera.aspect = w / h;
+                camera.updateProjectionMatrix();
+                renderer.setSize(w, h);
+            }
+            addEventListener('resize', resize);
+
+            /* ============ MATERIALS ============ */
+            const std = (c, r = .85, m = .05) => new THREE.MeshStandardMaterial({
+                color: c,
+                roughness: r,
+                metalness: m
+            });
+            const M = {
+                wood: std(0xC09B6A),
+                woodD: std(0x7A5C40),
+                ink: std(0x35322B, .7),
+                metal: std(0x4A463E, .45, .4),
+                plaster: std(0xEDE7D9, .95),
+                linen: std(0xDFD6C0, .95),
+                leaf: std(0x5F7D52),
+                leafD: std(0x4C6842),
+                clay: std(0xB08160),
+                cap: std(0x3A362C, .8),
+                brand: std(0xC4502B),
+                brandL: std(0xC4502B),
+                brandD: std(0xC4502B),
+            };
+            const ghostMat = new THREE.MeshStandardMaterial({
+                color: 0xC4502B,
+                transparent: true,
+                opacity: .45,
+                depthWrite: false,
+                roughness: .9
+            });
+            const ringMat = new THREE.LineBasicMaterial({
+                color: 0xC4502B,
+                transparent: true,
+                opacity: .95
+            });
+            const WHITE = new THREE.Color(0xffffff),
+                BLACK = new THREE.Color(0x000000);
+            const brandSync = [{
+                m: M.brand
+            }, {
+                m: M.brandL,
+                w: .55
+            }, {
+                m: M.brandD,
+                b: .28
+            }, {
+                m: ghostMat,
+                w: .1
+            }, {
+                m: ringMat
+            }];
+            let brandHex = '#C4502B',
+                brandFrom = new THREE.Color(brandHex),
+                brandTo = new THREE.Color(brandHex),
+                brandT = 1;
+
+            function applyBrandColors() {
+                const cur = brandFrom.clone().lerp(brandTo, brandT);
+                brandSync.forEach(e => {
+                    const c = cur.clone();
+                    if (e.w) c.lerp(WHITE, e.w);
+                    if (e.b) c.lerp(BLACK, e.b);
+                    e.m.color.copy(c);
+                });
+            }
+
+            function setBrand(hex) {
+                brandFrom = brandFrom.clone().lerp(brandTo, brandT);
+                brandTo = new THREE.Color(hex);
+                brandT = 0;
+                brandHex = hex;
+                document.documentElement.style.setProperty('--brand', hex);
+                $('brandInput').value = hex;
+                renderThumbs();
+            }
+
+            /* ============ FURNITURE BUILDERS ============ */
+            function BX(g, w, h, d, m, x, y, z, ry) {
+                const s = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m);
+                s.position.set(x, y, z);
+                if (ry) s.rotation.y = ry;
+                s.castShadow = true;
+                s.receiveShadow = true;
+                g.add(s);
+                return s;
+            }
+
+            function CY(g, rt, rb, h, m, x, y, z, seg) {
+                const s = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg || 20), m);
+                s.position.set(x, y, z);
+                s.castShadow = true;
+                s.receiveShadow = true;
+                g.add(s);
+                return s;
+            }
+
+            function SP(g, r, m, x, y, z) {
+                const s = new THREE.Mesh(new THREE.SphereGeometry(r, 18, 14), m);
+                s.position.set(x, y, z);
+                s.castShadow = true;
+                g.add(s);
+                return s;
+            }
+
+            function buildGroup(type) {
+                const g = new THREE.Group();
+                switch (type) {
+                    case 'chair':
+                        [
+                            [-.19, -.19],
+                            [.19, -.19],
+                            [-.19, .19],
+                            [.19, .19]
+                        ].forEach(p => BX(g, .045, .44, .045, M.ink, p[0], .22, p[1]));
+                        BX(g, .46, .05, .46, M.brand, 0, .465, 0); {
+                            const b = BX(g, .46, .4, .045, M.woodD, 0, .7, -.205);
+                            b.rotation.x = -.1;
+                        }
+                        break;
+                    case 'stool':
+                        CY(g, .16, .18, .03, M.ink, 0, .02, 0);
+                        CY(g, .028, .028, .68, M.ink, 0, .37, 0); {
+                            const t = new THREE.Mesh(new THREE.TorusGeometry(.14, .012, 8, 24), M.metal);
+                            t.rotation.x = Math.PI / 2;
+                            t.position.y = .24;
+                            t.castShadow = true;
+                            g.add(t);
+                        }
+                        CY(g, .175, .175, .06, M.brand, 0, .73, 0);
+                        break;
+                    case 'banquette':
+                        BX(g, 1.5, .12, .65, M.ink, 0, .06, 0);
+                        BX(g, 1.5, .3, .62, M.linen, 0, .28, 0);
+                        BX(g, .7, .15, .58, M.brand, -.37, .5, .02);
+                        BX(g, .7, .15, .58, M.brand, .37, .5, .02);
+                        BX(g, 1.5, .55, .14, M.brandL, 0, .62, -.27);
+                        break;
+                    case 'booth':
+                        [1, -1].forEach(s => {
+                            BX(g, 1.9, .44, .5, M.ink, 0, .22, s * .58);
+                            BX(g, 1.9, .1, .55, M.brand, 0, .49, s * .56);
+                            BX(g, 1.9, .68, .12, M.brandD, 0, .82, s * .89);
+                        });
+                        BX(g, .09, .72, .09, M.ink, -.6, .36, 0);
+                        BX(g, .09, .72, .09, M.ink, .6, .36, 0);
+                        BX(g, 1.55, .05, .75, M.wood, 0, .745, 0);
+                        break;
+                    case 'tableR':
+                        CY(g, .35, .35, .045, M.wood, 0, .73, 0);
+                        CY(g, .035, .035, .7, M.ink, 0, .36, 0);
+                        CY(g, .2, .22, .03, M.ink, 0, .015, 0);
+                        break;
+                    case 'tableS':
+                        BX(g, .8, .045, .8, M.wood, 0, .73, 0);
+                        [
+                            [-.34, -.34],
+                            [.34, -.34],
+                            [-.34, .34],
+                            [.34, .34]
+                        ].forEach(p => BX(g, .05, .71, .05, M.ink, p[0], .355, p[1]));
+                        break;
+                    case 'communal':
+                        BX(g, 2.4, .05, .9, M.wood, 0, .735, 0);
+                        BX(g, .08, .7, .72, M.ink, -1.02, .35, 0);
+                        BX(g, .08, .7, .72, M.ink, 1.02, .35, 0);
+                        BX(g, 2.0, .05, .07, M.ink, 0, .14, 0);
+                        break;
+                    case 'counter':
+                        BX(g, 2.34, .86, .58, M.ink, 0, .43, -.02);
+                        BX(g, 2.36, .7, .035, M.brand, 0, .44, .3);
+                        BX(g, 2.5, .05, .72, M.wood, 0, .885, 0);
+                        break;
+                    case 'espresso':
+                        BX(g, 1.2, .9, .62, M.woodD, 0, .45, 0);
+                        BX(g, 1.26, .04, .68, M.ink, 0, .92, 0);
+                        BX(g, .5, .34, .34, M.metal, 0, 1.13, -.1);
+                        BX(g, .54, .04, .36, M.ink, 0, 1.32, -.1);
+                        BX(g, .09, .07, .1, M.ink, -.14, 1.0, .16);
+                        BX(g, .09, .07, .1, M.ink, .14, 1.0, .16);
+                        CY(g, .06, .07, .28, M.metal, .44, 1.08, -.05);
+                        CY(g, .035, .03, .09, M.linen, .2, 1.0, .2);
+                        CY(g, .035, .03, .09, M.linen, .32, 1.0, .2);
+                        break;
+                    case 'pos':
+                        BX(g, 1.0, .95, .52, M.ink, 0, .475, -.02);
+                        BX(g, 1.0, .78, .03, M.brand, 0, .44, .26);
+                        BX(g, 1.06, .04, .6, M.wood, 0, .97, 0); {
+                            const s = BX(g, .32, .22, .025, M.ink, 0, 1.16, -.05);
+                            s.rotation.x = -.22;
+                        }
+                        BX(g, .05, .14, .05, M.ink, 0, 1.03, -.02);
+                        break;
+                    case 'shelf':
+                        BX(g, .05, 2.0, .38, M.woodD, -.875, 1.0, 0);
+                        BX(g, .05, 2.0, .38, M.woodD, .875, 1.0, 0);
+                        BX(g, 1.7, 1.9, .03, M.brandL, 0, 1.0, -.165);
+                        [.28, .86, 1.44, 1.98].forEach(y => BX(g, 1.7, .035, .36, M.wood, 0, y, 0));
+                        BX(g, .24, .22, .2, M.brand, -.4, .43, 0);
+                        BX(g, .2, .3, .18, M.linen, .25, .5, 0);
+                        BX(g, .26, .2, .2, M.linen, -.15, 1.0, 0);
+                        BX(g, .2, .24, .18, M.brand, .55, 1.02, 0);
+                        BX(g, .3, .2, .2, M.linen, .1, 1.56, 0);
+                        BX(g, .2, .26, .18, M.brandD, -.55, 1.59, 0);
+                        break;
+                    case 'display':
+                        BX(g, 1.2, .05, .8, M.wood, 0, .78, 0);
+                        [
+                            [-.55, -.35],
+                            [.55, -.35],
+                            [-.55, .35],
+                            [.55, .35]
+                        ].forEach(p => BX(g, .05, .76, .05, M.ink, p[0], .38, p[1]));
+                        BX(g, 1.08, .03, .68, M.woodD, 0, .32, 0);
+                        BX(g, .3, .2, .24, M.linen, -.25, .9, .05);
+                        BX(g, .26, .26, .22, M.brand, .22, .94, -.08);
+                        BX(g, .24, .16, .2, M.brandD, .28, .4, .05);
+                        BX(g, .28, .14, .2, M.linen, -.2, .38, -.05);
+                        break;
+                    case 'rack':
+                        CY(g, .02, .02, 1.56, M.metal, -.58, .78, 0);
+                        CY(g, .02, .02, 1.56, M.metal, .58, .78, 0); {
+                            const bar = new THREE.Mesh(new THREE.CylinderGeometry(.017, .017, 1.2, 12), M.metal);
+                            bar.rotation.z = Math.PI / 2;
+                            bar.position.y = 1.55;
+                            bar.castShadow = true;
+                            g.add(bar);
+                        }
+                        BX(g, .09, .035, .42, M.metal, -.58, .018, 0);
+                        BX(g, .09, .035, .42, M.metal, .58, .018, 0);
+                        [.46, .23, 0, -.23, -.46].forEach((x, i) => {
+                            const c = [M.linen, M.brandL, M.ink, M.oat = M.linen, M.brand][i];
+                            BX(g, .06, .62, .36, c, x, .9, .02, (i % 2 ? -.04 : .05));
+                        });
+                        break;
+                    case 'screen':
+                        BX(g, .06, 1.5, .06, M.ink, -.77, .75, 0);
+                        BX(g, .06, 1.5, .06, M.ink, .77, .75, 0);
+                        BX(g, 1.48, 1.28, .055, M.brandL, 0, .78, 0);
+                        BX(g, .5, .04, .3, M.ink, -.6, .02, 0);
+                        BX(g, .5, .04, .3, M.ink, .6, .02, 0);
+                        break;
+                    case 'planter':
+                        CY(g, .22, .16, .42, M.clay, 0, .21, 0);
+                        CY(g, .2, .2, .03, M.ink, 0, .42, 0);
+                        CY(g, .028, .035, .55, M.woodD, 0, .68, 0);
+                        SP(g, .3, M.leaf, 0, 1.05, 0);
+                        SP(g, .23, M.leafD, .2, 1.28, .08);
+                        SP(g, .2, M.leaf, -.19, 1.3, -.1);
+                        break;
+                }
+                return g;
+            }
+
+            /* ============ PLAN-SYMBOL DRAWING (catalog thumbs + export sheet) ============ */
+            function drawPlan(g, def, x, y, rot, s, ink, brand) {
+                g.save();
+                g.translate(x, y);
+                g.rotate(rot * Math.PI / 180);
+                const w = def.w * s,
+                    d = def.d * s,
+                    lw = Math.max(1.1, s * .028);
+                g.lineWidth = lw;
+                g.strokeStyle = ink;
+                g.lineJoin = 'round';
+                g.lineCap = 'round';
+                const fill = a => {
+                    g.globalAlpha = a;
+                    g.fillStyle = brand;
+                    g.fill();
+                    g.globalAlpha = 1;
+                };
+                switch (def.kind) {
+                    case 'chair':
+                        g.beginPath();
+                        g.rect(-w / 2, -d / 2, w, d);
+                        fill(.28);
+                        g.stroke();
+                        g.lineWidth = lw * 2.4;
+                        g.beginPath();
+                        g.moveTo(-w / 2 * .78, -d / 2 + lw);
+                        g.lineTo(w / 2 * .78, -d / 2 + lw);
+                        g.stroke();
+                        break;
+                    case 'stool':
+                        g.beginPath();
+                        g.arc(0, 0, w / 2, 0, 7);
+                        fill(.32);
+                        g.stroke();
+                        break;
+                    case 'seat':
+                        g.beginPath();
+                        g.rect(-w / 2, -d / 2, w, d);
+                        fill(.22);
+                        g.stroke();
+                        g.globalAlpha = .45;
+                        g.fillStyle = brand;
+                        g.fillRect(-w / 2, -d / 2, w, d * .28);
+                        g.globalAlpha = 1;
+                        g.lineWidth = lw * .7;
+                        g.beginPath();
+                        g.moveTo(0, -d / 2 + d * .3);
+                        g.lineTo(0, d / 2);
+                        g.stroke();
+                        break;
+                    case 'booth':
+                        g.beginPath();
+                        g.rect(-w / 2, -d / 2, w, d);
+                        g.stroke();
+                        g.globalAlpha = .32;
+                        g.fillStyle = brand;
+                        g.fillRect(-w / 2, -d / 2 + lw, w, d * .24);
+                        g.fillRect(-w / 2, d / 2 - lw - d * .24, w, d * .24);
+                        g.globalAlpha = 1;
+                        g.lineWidth = lw * .8;
+                        g.strokeRect(-w * .4, -d * .14, w * .8, d * .28);
+                        break;
+                    case 'circ':
+                        g.beginPath();
+                        g.arc(0, 0, w / 2, 0, 7);
+                        g.stroke();
+                        g.beginPath();
+                        g.arc(0, 0, Math.max(1.5, s * .03), 0, 7);
+                        g.fillStyle = ink;
+                        g.fill();
+                        break;
+                    case 'rect':
+                        g.strokeRect(-w / 2, -d / 2, w, d);
+                        g.lineWidth = lw * .6;
+                        g.strokeRect(-w / 2 + lw * 1.8, -d / 2 + lw * 1.8, w - lw * 3.6, d - lw * 3.6);
+                        break;
+                    case 'counter':
+                        g.beginPath();
+                        g.rect(-w / 2, -d / 2, w, d);
+                        g.stroke();
+                        g.lineWidth = lw * 2.2;
+                        g.beginPath();
+                        g.moveTo(-w / 2, d / 2 - lw);
+                        g.lineTo(w / 2, d / 2 - lw);
+                        g.stroke();
+                        g.lineWidth = lw * .8;
+                        for (let i = 0; i < 5; i++) {
+                            const px = -w / 2 + w * (i + .7) / 5.4;
+                            g.beginPath();
+                            g.moveTo(px, -d / 2 + lw * 1.5);
+                            g.lineTo(px + lw * 1.6, -d / 2 + d * .4);
+                            g.stroke();
+                        }
+                        break;
+                    case 'shelf':
+                        g.beginPath();
+                        g.rect(-w / 2, -d / 2, w, d);
+                        g.stroke();
+                        g.lineWidth = lw * .7;
+                        const n = Math.max(2, Math.round(w / (0.45 * s)));
+                        for (let i = 1; i < n; i++) {
+                            const px = -w / 2 + w * i / n;
+                            g.beginPath();
+                            g.moveTo(px, -d / 2);
+                            g.lineTo(px, d / 2);
+                            g.stroke();
+                        }
+                        break;
+                    case 'rack':
+                        g.beginPath();
+                        g.rect(-w / 2, -d / 2, w, d);
+                        g.stroke();
+                        for (let i = 0; i < 5; i++) {
+                            g.beginPath();
+                            g.arc(-w / 2 + w * (i + .5) / 5, 0, Math.max(1.4, s * .05), 0, 7);
+                            g.stroke();
+                        }
+                        break;
+                    case 'thin':
+                        g.globalAlpha = .85;
+                        g.fillStyle = ink;
+                        g.fillRect(-w / 2, -d / 2, w, d);
+                        g.globalAlpha = 1;
+                        break;
+                    case 'plant':
+                        g.beginPath();
+                        g.arc(0, 0, w / 2, 0, 7);
+                        g.stroke();
+                        g.beginPath();
+                        g.arc(0, 0, w * .24, 0, 7);
+                        g.stroke();
+                        for (let i = 0; i < 3; i++) {
+                            const a = i * 2.09;
+                            g.beginPath();
+                            g.moveTo(Math.cos(a) * w * .24, Math.sin(a) * w * .24);
+                            g.lineTo(Math.cos(a) * w * .46, Math.sin(a) * w * .46);
+                            g.stroke();
+                        }
+                        break;
+                }
+                g.restore();
+            }
+            const thumbs = {};
+
+            function renderThumbs() {
+                Object.keys(CATALOG).forEach(t => {
+                    const def = CATALOG[t],
+                        c = document.createElement('canvas');
+                    c.width = c.height = 88;
+                    const g = c.getContext('2d');
+                    g.translate(44, 44);
+                    drawPlan(g, def, 0, 0, 0, 58 / Math.max(def.w, def.d), '#26231C', brandHex);
+                    thumbs[t] = c.toDataURL();
+                });
+                document.querySelectorAll('.irow').forEach(r => {
+                    r.querySelector('img').src = thumbs[r.dataset.type];
+                });
+            }
+
+            /* ============ TEMPLATES ============ */
+            function fourTop(x, z) {
+                return [{
+                    t: 'tableS',
+                    x,
+                    z,
+                    r: 0
+                }, {
+                    t: 'chair',
+                    x,
+                    z: z - .68,
+                    r: 0
+                }, {
+                    t: 'chair',
+                    x,
+                    z: z + .68,
+                    r: 180
+                }, {
+                    t: 'chair',
+                    x: x - .68,
+                    z,
+                    r: 270
+                }, {
+                    t: 'chair',
+                    x: x + .68,
+                    z,
+                    r: 90
+                }];
+            }
+
+            function pod(cx, cz) {
+                const a = [{
+                    t: 'desk0'
+                }];
+                a.length = 0;
+                a.push({
+                    t: 'communal' === 0 ? 0 : 0
+                });
+                a.length = 0; // placeholder removed
+                a.push({
+                    t: 'x'
+                });
+                a.length = 0;
+                const out = [];
+                out.push({
+                    t: 'tableS',
+                    x: cx,
+                    z: cz - .36,
+                    r: 0
+                }, {
+                    t: 'tableS',
+                    x: cx,
+                    z: cz + .36,
+                    r: 180
+                });
+                // desks: reuse square tables? no — use dedicated desks via communal? We use tableS halves as desk tops is wrong; use 'desk' item
+                return out;
+            }
+            // NOTE: co-working uses dedicated desks — implemented via 'display' tops? Cleaner: add a Desk item.
+            CATALOG.desk = {
+                name: 'Work desk 140',
+                cat: 'Tables',
+                w: 1.4,
+                d: .7,
+                h: .74,
+                cost: 430,
+                seats: 0,
+                kind: 'rect'
+            };
+            // extend builder
+            const _build = buildGroup;
+
+            function deskInto(g) { /* built below in switch addition */ }
+
+            const TEMPLATES = {
+                cafe: {
+                    name: 'Café',
+                    W: 12,
+                    D: 9,
+                    ent: {
+                        x: 2.2,
+                        w: 1.4
+                    },
+                    back: {
+                        x: -4.8,
+                        w: .95
+                    },
+                    seed: 'fitout-cafe-doc',
+                    blurb: 'Espresso bar · banquette rail · loose seating',
+                    items: () => {
+                        const a = [];
+                        a.push({
+                            t: 'counter',
+                            x: -.8,
+                            z: -3.95,
+                            r: 0
+                        }, {
+                            t: 'espresso',
+                            x: -3.4,
+                            z: -3.95,
+                            r: 0
+                        }, {
+                            t: 'pos',
+                            x: 1.3,
+                            z: -3.9,
+                            r: 0
+                        }, {
+                            t: 'display',
+                            x: 3.2,
+                            z: -3.85,
+                            r: 0
+                        }, {
+                            t: 'shelf',
+                            x: 5.0,
+                            z: -4.2,
+                            r: 0
+                        });
+                        [-1.4, .1, 1.6].forEach(z => {
+                            a.push({
+                                t: 'banquette',
+                                x: -5.55,
+                                z,
+                                r: 270
+                            }, {
+                                t: 'tableR',
+                                x: -4.55,
+                                z
+                            }, {
+                                t: 'chair',
+                                x: -3.8,
+                                z,
+                                r: 90
+                            });
+                        });
+                        a.push({
+                            t: 'tableR',
+                            x: -1.2,
+                            z: .6
+                        }, {
+                            t: 'chair',
+                            x: -1.2,
+                            z: -.08,
+                            r: 0
+                        }, {
+                            t: 'chair',
+                            x: -1.88,
+                            z: .6,
+                            r: 270
+                        }, {
+                            t: 'chair',
+                            x: -1.2,
+                            z: 1.28,
+                            r: 180
+                        });
+                        a.push({
+                            t: 'tableR',
+                            x: -1.2,
+                            z: 2.9
+                        }, {
+                            t: 'chair',
+                            x: -1.2,
+                            z: 2.22,
+                            r: 0
+                        }, {
+                            t: 'chair',
+                            x: -.52,
+                            z: 2.9,
+                            r: 90
+                        }, {
+                            t: 'chair',
+                            x: -1.88,
+                            z: 2.9,
+                            r: 270
+                        });
+                        a.push({
+                            t: 'tableS',
+                            x: 1.4,
+                            z: .3
+                        }, {
+                            t: 'chair',
+                            x: 1.4,
+                            z: -.38,
+                            r: 0
+                        }, {
+                            t: 'chair',
+                            x: 1.4,
+                            z: .98,
+                            r: 180
+                        });
+                        a.push({
+                            t: 'tableS',
+                            x: 1.4,
+                            z: 2.7
+                        }, {
+                            t: 'chair',
+                            x: .72,
+                            z: 2.7,
+                            r: 270
+                        }, {
+                            t: 'chair',
+                            x: 2.08,
+                            z: 2.7,
+                            r: 90
+                        });
+                        a.push({
+                            t: 'tableS',
+                            x: 3.6,
+                            z: 1.6
+                        }, {
+                            t: 'chair',
+                            x: 3.6,
+                            z: .92,
+                            r: 0
+                        }, {
+                            t: 'chair',
+                            x: 3.6,
+                            z: 2.28,
+                            r: 180
+                        });
+                        a.push({
+                            t: 'communal',
+                            x: 4.6,
+                            z: -1.6,
+                            r: 90
+                        }, {
+                            t: 'stool',
+                            x: 3.8,
+                            z: -2.2,
+                            r: 90
+                        }, {
+                            t: 'stool',
+                            x: 3.8,
+                            z: -1.6,
+                            r: 90
+                        }, {
+                            t: 'stool',
+                            x: 3.8,
+                            z: -1.0,
+                            r: 90
+                        });
+                        a.push({
+                            t: 'planter',
+                            x: -5.5,
+                            z: 3.9
+                        }, {
+                            t: 'planter',
+                            x: 5.5,
+                            z: 3.9
+                        });
+                        return a;
+                    }
+                },
+                cowork: {
+                    name: 'Co-working',
+                    W: 14,
+                    D: 10,
+                    ent: {
+                        x: 3,
+                        w: 1.4
+                    },
+                    back: {
+                        x: -5.5,
+                        w: .95
+                    },
+                    seed: 'fitout-cowork-doc',
+                    blurb: 'Desk pods · meeting table · lounge corner',
+                    items: () => {
+                        const a = [];
+                        [-4.6, -1.4, 1.8].forEach(cx => {
+                            a.push({
+                                t: 'desk',
+                                x: cx,
+                                z: -2.16,
+                                r: 0
+                            }, {
+                                t: 'desk',
+                                x: cx,
+                                z: -1.44,
+                                r: 180
+                            }, {
+                                t: 'chair',
+                                x: cx - .36,
+                                z: -2.86,
+                                r: 0
+                            }, {
+                                t: 'chair',
+                                x: cx + .36,
+                                z: -2.86,
+                                r: 0
+                            }, {
+                                t: 'chair',
+                                x: cx - .36,
+                                z: -.74,
+                                r: 180
+                            }, {
+                                t: 'chair',
+                                x: cx + .36,
+                                z: -.74,
+                                r: 180
+                            });
+                        });
+                        a.push({
+                            t: 'screen',
+                            x: -3.0,
+                            z: -1.8,
+                            r: 90
+                        }, {
+                            t: 'screen',
+                            x: .2,
+                            z: -1.8,
+                            r: 90
+                        });
+                        a.push({
+                            t: 'communal',
+                            x: 5.6,
+                            z: -1.8,
+                            r: 90
+                        });
+                        [
+                            [4.8, -2.5],
+                            [4.8, -1.8],
+                            [4.8, -1.1]
+                        ].forEach(p => a.push({
+                            t: 'chair',
+                            x: p[0],
+                            z: p[1],
+                            r: 270
+                        }));
+                        [
+                            [6.4, -2.5],
+                            [6.4, -1.8],
+                            [6.4, -1.1]
+                        ].forEach(p => a.push({
+                            t: 'chair',
+                            x: p[0],
+                            z: p[1],
+                            r: 90
+                        }));
+                        a.push({
+                            t: 'banquette',
+                            x: -5.0,
+                            z: 4.0,
+                            r: 180
+                        }, {
+                            t: 'tableR',
+                            x: -5.0,
+                            z: 3.1
+                        }, {
+                            t: 'banquette',
+                            x: -5.0,
+                            z: 2.2,
+                            r: 0
+                        });
+                        a.push({
+                            t: 'banquette',
+                            x: -1.5,
+                            z: 4.0,
+                            r: 180
+                        }, {
+                            t: 'tableR',
+                            x: -1.5,
+                            z: 3.1
+                        }, {
+                            t: 'chair',
+                            x: -.82,
+                            z: 3.1,
+                            r: 90
+                        }, {
+                            t: 'chair',
+                            x: -2.18,
+                            z: 3.1,
+                            r: 270
+                        });
+                        a.push({
+                            t: 'espresso',
+                            x: 6.45,
+                            z: 2.5,
+                            r: 90
+                        }, {
+                            t: 'stool',
+                            x: 5.7,
+                            z: 2.1,
+                            r: 0
+                        }, {
+                            t: 'stool',
+                            x: 5.7,
+                            z: 2.9,
+                            r: 0
+                        });
+                        a.push({
+                            t: 'shelf',
+                            x: 3.6,
+                            z: -4.7,
+                            r: 0
+                        }, {
+                            t: 'shelf',
+                            x: 5.5,
+                            z: -4.7,
+                            r: 0
+                        });
+                        a.push({
+                            t: 'planter',
+                            x: -6.5,
+                            z: -4.5
+                        }, {
+                            t: 'planter',
+                            x: 6.5,
+                            z: -4.5
+                        }, {
+                            t: 'planter',
+                            x: -6.5,
+                            z: 4.5
+                        });
+                        return a;
+                    }
+                },
+                boutique: {
+                    name: 'Boutique',
+                    W: 10,
+                    D: 8,
+                    ent: {
+                        x: 0,
+                        w: 1.6
+                    },
+                    back: {
+                        x: 3.5,
+                        w: .9
+                    },
+                    seed: 'fitout-boutique-doc',
+                    blurb: 'Wall shelving · display tables · rails',
+                    items: () => {
+                        const a = [];
+                        a.push({
+                            t: 'shelf',
+                            x: -3.3,
+                            z: -3.7,
+                            r: 0
+                        }, {
+                            t: 'shelf',
+                            x: -1.4,
+                            z: -3.7,
+                            r: 0
+                        }, {
+                            t: 'shelf',
+                            x: .5,
+                            z: -3.7,
+                            r: 0
+                        });
+                        a.push({
+                            t: 'shelf',
+                            x: -4.7,
+                            z: -1.2,
+                            r: 90
+                        }, {
+                            t: 'shelf',
+                            x: -4.7,
+                            z: .7,
+                            r: 90
+                        });
+                        a.push({
+                            t: 'display',
+                            x: -1.0,
+                            z: -.7,
+                            r: 0
+                        }, {
+                            t: 'display',
+                            x: 1.1,
+                            z: .3,
+                            r: 90
+                        }, {
+                            t: 'display',
+                            x: -1.2,
+                            z: 1.7,
+                            r: 0
+                        });
+                        a.push({
+                            t: 'rack',
+                            x: 3.3,
+                            z: -2.0,
+                            r: 90
+                        }, {
+                            t: 'rack',
+                            x: 3.3,
+                            z: 0,
+                            r: 90
+                        }, {
+                            t: 'rack',
+                            x: 3.3,
+                            z: 2.0,
+                            r: 90
+                        });
+                        a.push({
+                            t: 'pos',
+                            x: 1.6,
+                            z: -3.5,
+                            r: 0
+                        });
+                        a.push({
+                            t: 'banquette',
+                            x: 4.55,
+                            z: 1.2,
+                            r: 90
+                        });
+                        a.push({
+                            t: 'planter',
+                            x: -4.5,
+                            z: 3.4
+                        }, {
+                            t: 'planter',
+                            x: 4.4,
+                            z: -3.4
+                        });
+                        return a;
+                    }
+                },
+                restaurant: {
+                    name: 'Restaurant',
+                    W: 13,
+                    D: 10,
+                    ent: {
+                        x: -1,
+                        w: 1.6
+                    },
+                    back: {
+                        x: 4.5,
+                        w: .95
+                    },
+                    seed: 'fitout-bistro-doc',
+                    blurb: 'Kitchen pass · booths · four-tops · chef\u2019s table',
+                    items: () => {
+                        const a = [];
+                        a.push({
+                            t: 'counter',
+                            x: -5.0,
+                            z: -4.5,
+                            r: 0
+                        }, {
+                            t: 'counter',
+                            x: -2.5,
+                            z: -4.5,
+                            r: 0
+                        }, {
+                            t: 'pos',
+                            x: -.6,
+                            z: -4.42,
+                            r: 0
+                        });
+                        [-2.2, 0, 2.2].forEach(z => a.push({
+                            t: 'booth',
+                            x: -5.5,
+                            z,
+                            r: 270
+                        }));
+                        [
+                            [-2.0, -1.6],
+                            [-2.0, 1.6],
+                            [.6, -1.6],
+                            [.6, 1.6]
+                        ].forEach(p => a.push(...fourTop(p[0], p[1])));
+                        a.push({
+                            t: 'communal',
+                            x: 4.6,
+                            z: -1.2,
+                            r: 90
+                        }, {
+                            t: 'stool',
+                            x: 3.7,
+                            z: -1.9,
+                            r: 90
+                        }, {
+                            t: 'stool',
+                            x: 3.7,
+                            z: -1.2,
+                            r: 90
+                        }, {
+                            t: 'stool',
+                            x: 3.7,
+                            z: -.5,
+                            r: 90
+                        }, {
+                            t: 'stool',
+                            x: 5.5,
+                            z: -1.9,
+                            r: 270
+                        }, {
+                            t: 'stool',
+                            x: 5.5,
+                            z: -.5,
+                            r: 270
+                        });
+                        a.push({
+                            t: 'banquette',
+                            x: 6.05,
+                            z: 1.6,
+                            r: 90
+                        }, {
+                            t: 'banquette',
+                            x: 6.05,
+                            z: 3.4,
+                            r: 90
+                        }, {
+                            t: 'tableR',
+                            x: 5.3,
+                            z: 1.6
+                        }, {
+                            t: 'tableR',
+                            x: 5.3,
+                            z: 3.4
+                        }, {
+                            t: 'chair',
+                            x: 4.62,
+                            z: 1.6,
+                            r: 270
+                        }, {
+                            t: 'chair',
+                            x: 4.62,
+                            z: 3.4,
+                            r: 270
+                        });
+                        a.push({
+                            t: 'planter',
+                            x: -6.0,
+                            z: 4.4
+                        }, {
+                            t: 'planter',
+                            x: 6.0,
+                            z: -4.4
+                        }, {
+                            t: 'planter',
+                            x: 2.2,
+                            z: 4.4
+                        });
+                        return a;
+                    }
+                },
+            };
+
+            /* desk builder (added to catalog above) */
+            const _builders = {};
+
+            function buildGroup2(type) {
+                if (type === 'desk') {
+                    const g = new THREE.Group();
+                    BX(g, 1.4, .04, .68, M.wood, 0, .72, 0);
+                    BX(g, .05, .7, .6, M.ink, -.65, .35, 0);
+                    BX(g, .05, .7, .6, M.ink, .65, .35, 0);
+                    BX(g, .34, .025, .24, M.ink, -.35, .745, -.12);
+                    BX(g, .4, .28, .02, M.ink, .42, .9, -.2);
+                    BX(g, .05, .16, .05, M.ink, .42, .8, -.2);
+                    return g;
+                }
+                return _build(type);
+            }
+
+            /* ============ ROOM ============ */
+            let tplKey = 'cafe',
+                tpl = TEMPLATES.cafe;
+            const room = {
+                W: 12,
+                D: 9
+            };
+            const roomG = new THREE.Group();
+            scene.add(roomG);
+            const itemsG = new THREE.Group();
+            scene.add(itemsG);
+            let dimMats = [],
+                fireMats = [],
+                ribbons = {
+                    mats: [],
+                    group: new THREE.Group()
+                };
+            scene.add(ribbons.group);
+
+            function gridTex(base, minor, major, cellPx, subPx) {
+                const c = document.createElement('canvas');
+                c.width = c.height = cellPx;
+                const g = c.getContext('2d');
+                g.fillStyle = base;
+                g.fillRect(0, 0, cellPx, cellPx);
+                g.strokeStyle = minor;
+                g.lineWidth = 1;
+                g.beginPath();
+                g.moveTo(cellPx / 2, 0);
+                g.lineTo(cellPx / 2, cellPx);
+                g.moveTo(0, cellPx / 2);
+                g.lineTo(cellPx, cellPx / 2);
+                g.stroke();
+                g.strokeStyle = major;
+                g.strokeRect(.5, .5, cellPx - 1, cellPx - 1);
+                const t = new THREE.CanvasTexture(c);
+                t.wrapS = t.wrapT = THREE.RepeatWrapping;
+                t.anisotropy = 4;
+                return t;
+            }
+
+            function textSprite(txt, scale) {
+                const c = document.createElement('canvas');
+                c.width = 256;
+                c.height = 80;
+                const g = c.getContext('2d');
+                g.font = '500 42px "IBM Plex Mono",monospace';
+                g.textAlign = 'center';
+                g.textBaseline = 'middle';
+                g.fillStyle = '#26231C';
+                g.fillText(txt, 128, 42);
+                const sp = new THREE.Sprite(new THREE.SpriteMaterial({
+                    map: new THREE.CanvasTexture(c),
+                    transparent: true,
+                    opacity: 0,
+                    depthTest: false
+                }));
+                sp.scale.set(2.1 * scale, .66 * scale, 1);
+                sp.renderOrder = 20;
+                return sp;
+            }
+
+            function line(pts, mat) {
+                const geo = new THREE.BufferGeometry().setFromPoints(pts.map(p => new THREE.Vector3(p[0], p[1] || 0, p[2])));
+                return new THREE.Line(geo, mat);
+            }
+
+            function ribbonShaderMat() {
+                return new THREE.ShaderMaterial({
+                    transparent: true,
+                    depthWrite: false,
+                    side: THREE.DoubleSide,
+                    uniforms: {
+                        uT: {
+                            value: 0
+                        },
+                        uFade: {
+                            value: 0
+                        },
+                        uRep: {
+                            value: 4
+                        }
+                    },
+                    vertexShader: 'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+                    fragmentShader: `varying vec2 vUv;uniform float uT,uFade,uRep;
+      void main(){
+        float fy=abs(vUv.y-.5)*2.0;
+        float fx=fract(vUv.x*uRep-uT);
+        float a=fx-fy*.45;
+        float band=smoothstep(.02,.10,a)*(1.0-smoothstep(.30,.44,a));
+        float edge=smoothstep(1.0,.8,fy)*smoothstep(0.0,.18,fy);
+        float alpha=(band*.95+.08)*edge*uFade;
+        gl_FragColor=vec4(vec3(.10,.60,.34),alpha);}`
+                });
+            }
+            let exitSignTex = null;
+
+            function makeExitTex() {
+                const c = document.createElement('canvas');
+                c.width = 256;
+                c.height = 96;
+                const g = c.getContext('2d');
+                g.fillStyle = '#1E8A55';
+                g.fillRect(0, 0, 256, 96);
+                g.fillStyle = '#fff';
+                g.font = '700 54px "Space Grotesk",sans-serif';
+                g.textAlign = 'center';
+                g.textBaseline = 'middle';
+                g.fillText('EXIT', 128, 52);
+                return new THREE.CanvasTexture(c);
+            }
+
+            function buildRoom() {
+                while (roomG.children.length) roomG.remove(roomG.children[0]);
+                dimMats = [];
+                fireMats = [];
+                ribbons.mats = [];
+                while (ribbons.group.children.length) ribbons.group.remove(ribbons.group.children[0]);
+                const {
+                    W,
+                    D
+                } = room, hD = D / 2, hW = W / 2, WH = 1.15, T = .14;
+
+                // ground + floor
+                const gt = gridTex('#EDE6D5', 'rgba(60,55,45,.07)', 'rgba(60,55,45,.11)', 256);
+                gt.repeat.set(30, 30);
+                const ground = new THREE.Mesh(new THREE.PlaneGeometry(120, 120), new THREE.MeshStandardMaterial({
+                    map: gt,
+                    roughness: .95
+                }));
+                ground.rotation.x = -Math.PI / 2;
+                ground.position.y = -.02;
+                ground.receiveShadow = true;
+                roomG.add(ground);
+                const ft = gridTex('#F5F0E4', 'rgba(60,55,45,.055)', 'rgba(60,55,45,.13)', 256);
+                ft.repeat.set(W, D);
+                const floor = new THREE.Mesh(new THREE.PlaneGeometry(W, D), new THREE.MeshStandardMaterial({
+                    map: ft,
+                    roughness: .9
+                }));
+                floor.rotation.x = -Math.PI / 2;
+                floor.receiveShadow = true;
+                roomG.add(floor);
+
+                // walls with door gaps (north = back exit, south = entrance)
+                const ent = tpl.ent,
+                    back = tpl.back;
+
+                function wall(x1, x2, z) {
+                    const L = x2 - x1;
+                    if (L < .06) return;
+                    const w = BX(roomG, L, WH, T, M.plaster, (x1 + x2) / 2, WH / 2, z);
+                    w.castShadow = true;
+                    BX(roomG, L + .02, .05, T + .07, M.cap, (x1 + x2) / 2, WH + .025, z);
+                }
+
+                function wallZ(z1, z2, x) {
+                    const L = z2 - z1;
+                    if (L < .06) return;
+                    const w = BX(roomG, T, WH, L, M.plaster, x, WH / 2, (z1 + z2) / 2);
+                    w.castShadow = true;
+                    BX(roomG, T + .07, .05, L + .02, M.cap, x, WH + .025, (z1 + z2) / 2);
+                }
+                wall(-hW, back.x - back.w / 2, -hD);
+                wall(back.x + back.w / 2, hW, -hD);
+                wall(-hW, ent.x - ent.w / 2, hD);
+                wall(ent.x + ent.w / 2, hW, hD);
+                wallZ(-hD, hD, -hW);
+                wallZ(-hD, hD, hW);
+                // door frames
+                [
+                    [back, -hD],
+                    [ent, hD]
+                ].forEach(([e, z]) => {
+                    BX(roomG, .12, WH, .22, M.cap, e.x - e.w / 2, WH / 2, z);
+                    BX(roomG, .12, WH, .22, M.cap, e.x + e.w / 2, WH / 2, z);
+                    BX(roomG, e.w + .12, .12, .22, M.cap, e.x, WH - .06, z);
+                });
+                // exit signs
+                if (!exitSignTex) exitSignTex = makeExitTex();
+                [
+                    [back, -hD, 0],
+                    [ent, hD, Math.PI]
+                ].forEach(([e, z, ry]) => {
+                    const m = new THREE.MeshBasicMaterial({
+                        map: exitSignTex,
+                        transparent: true,
+                        opacity: 0
+                    });
+                    const p = new THREE.Mesh(new THREE.PlaneGeometry(.5, .19), m);
+                    p.position.set(e.x, 1.42, z + Math.sign(z) * -.12);
+                    p.rotation.y = ry;
+                    p.renderOrder = 8;
+                    roomG.add(p);
+                    fireMats.push(m);
+                });
+
+                // egress ribbons: L paths from room core to each exit
+                const paths = [];
+                const p1 = [{
+                    x: 0,
+                    z: .45
+                }];
+                if (Math.abs(ent.x) > .3) p1.push({
+                    x: ent.x,
+                    z: .45
+                });
+                p1.push({
+                    x: ent.x,
+                    z: hD - .45
+                });
+                const p2 = [{
+                    x: 0,
+                    z: -.45
+                }];
+                if (Math.abs(back.x) > .3) p2.push({
+                    x: back.x,
+                    z: -.45
+                });
+                p2.push({
+                    x: back.x,
+                    z: -hD + .45
+                });
+                paths.push(p1, p2);
+                egressLen = 0;
+                paths.forEach(pts => {
+                    for (let i = 0; i < pts.length - 1; i++) {
+                        const a = pts[i],
+                            b = pts[i + 1],
+                            dx = b.x - a.x,
+                            dz = b.z - a.z,
+                            len = Math.hypot(dx, dz);
+                        egressLen += len;
+                        if (len < .25) continue;
+                        const geo = new THREE.PlaneGeometry(len, .55);
+                        geo.rotateX(-Math.PI / 2);
+                        const mat = ribbonShaderMat();
+                        mat.uniforms.uRep.value = Math.max(1, Math.round(len / .8));
+                        const m = new THREE.Mesh(geo, mat);
+                        m.position.set((a.x + b.x) / 2, .028, (a.z + b.z) / 2);
+                        m.rotation.y = Math.atan2(-dz, dx);
+                        m.renderOrder = 5;
+                        ribbons.group.add(m);
+                        ribbons.mats.push(mat);
+                    }
+                });
+                // assembly point marker
+                const disc = new THREE.Mesh(new THREE.CircleGeometry(.2, 24), new THREE.MeshBasicMaterial({
+                    color: 0x1E8A55,
+                    transparent: true,
+                    opacity: 0
+                }));
+                disc.rotation.x = -Math.PI / 2;
+                disc.position.y = .03;
+                disc.renderOrder = 6;
+                ribbons.group.add(disc);
+                const ring = new THREE.Mesh(new THREE.RingGeometry(.26, .3, 32), disc.material.clone());
+                ring.material.map = null;
+                ring.rotation.x = -Math.PI / 2;
+                ring.position.y = .031;
+                ring.renderOrder = 6;
+                ribbons.group.add(ring);
+                fireMats.push(disc.material, ring.material);
+
+                // dimension lines (plan view only)
+                const dm = () => {
+                    const m = new THREE.LineBasicMaterial({
+                        color: 0x26231C,
+                        transparent: true,
+                        opacity: 0
+                    });
+                    dimMats.push(m);
+                    return m;
+                };
+                const off = .85;
+                const dx1 = line([
+                    [-hW, 0, hD + off],
+                    [hW, 0, hD + off]
+                ], dm());
+                const dx2 = line([
+                    [-hW, 0, hD + off - .18],
+                    [-hW, 0, hD + off + .18]
+                ], dm());
+                const dx3 = line([
+                    [hW, 0, hD + off - .18],
+                    [hW, 0, hD + off + .18]
+                ], dm());
+                roomG.add(dx1, dx2, dx3);
+                const sx = textSprite(W.toFixed(1) + ' m', 1.4);
+                sx.position.set(0, .35, hD + off);
+                roomG.add(sx);
+                dimMats.push(sx.material);
+                const dz1 = line([
+                    [-hW - off, 0, -hD],
+                    [-hW - off, 0, hD]
+                ], dm());
+                const dz2 = line([
+                    [-hW - off - .18, 0, -hD],
+                    [-hW - off + .18, 0, -hD]
+                ], dm());
+                const dz3 = line([
+                    [-hW - off - .18, 0, hD],
+                    [-hW - off + .18, 0, hD]
+                ], dm());
+                roomG.add(dz1, dz2, dz3);
+                const sz = textSprite(D.toFixed(1) + ' m', 1.4);
+                sz.position.set(-hW - off, .35, 0);
+                roomG.add(sz);
+                dimMats.push(sz.material);
+
+                // shadow camera fit
+                const s = Math.max(W, D) / 2 + 4;
+                dir.shadow.camera.left = -s;
+                dir.shadow.camera.right = s;
+                dir.shadow.camera.top = s;
+                dir.shadow.camera.bottom = -s;
+                dir.shadow.camera.updateProjectionMatrix();
+            }
+            let egressLen = 0;
+
+            /* ============ ITEMS ============ */
+            const items = new Map();
+            let nextId = 1;
+            let selectedId = null;
+            const ring = new THREE.LineLoop(
+                new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-.5, 0, -.5), new THREE.Vector3(.5, 0, -.5), new THREE.Vector3(.5, 0, .5), new THREE.Vector3(-.5, 0, .5)]),
+                ringMat);
+            ring.visible = false;
+            scene.add(ring);
+
+            function halfExtents(def, rot) {
+                const a = rot * Math.PI / 180,
+                    c = Math.abs(Math.cos(a)),
+                    s = Math.abs(Math.sin(a));
+                return {
+                    hx: (def.w * c + def.d * s) / 2,
+                    hz: (def.w * s + def.d * c) / 2
+                };
+            }
+
+            function clampPos(def, x, z, rot) {
+                const {
+                    hx,
+                    hz
+                } = halfExtents(def, rot);
+                return {
+                    x: clamp(x, -room.W / 2 + hx + .06, room.W / 2 - hx - .06),
+                    z: clamp(z, -room.D / 2 + hz + .06, room.D / 2 - hz - .06)
+                };
+            }
+
+            function addItem(type, x, z, r, pushU = true) {
+                const def = CATALOG[type],
+                    g = buildGroup2(type);
+                const it = {
+                    id: nextId++,
+                    type,
+                    x,
+                    z,
+                    r: r || 0,
+                    group: g
+                };
+                g.position.set(x, 0, z);
+                g.rotation.y = -it.r * Math.PI / 180;
+                itemsG.add(g);
+                items.set(it.id, it);
+                if (pushU) pushUndo({
+                    t: 'add',
+                    id: it.id
+                });
+                recompute();
+                return it;
+            }
+
+            function removeItem(id, pushU = true) {
+                const it = items.get(id);
+                if (!it) return;
+                itemsG.remove(it.group);
+                items.delete(id);
+                if (pushU) pushUndo({
+                    t: 'rem',
+                    data: {
+                        type: it.type,
+                        x: it.x,
+                        z: it.z,
+                        r: it.r
+                    }
+                });
+                if (selectedId === id) select(null);
+                recompute();
+            }
+
+            function select(id) {
+                selectedId = id;
+                const pill = $('selPill');
+                if (id == null) {
+                    ring.visible = false;
+                    pill.style.display = 'none';
+                    return;
+                }
+                const it = items.get(id),
+                    def = CATALOG[it.type];
+                ring.visible = true;
+                ring.position.set(it.x, .03, it.z);
+                ring.rotation.y = -it.r * Math.PI / 180;
+                ring.scale.set(def.w + .34, 1, def.d + .34);
+                $('selName').textContent = def.name;
+                $('selPrice').textContent = fmt$(def.cost);
+                pill.style.display = 'flex';
+            }
+
+            function refreshRing() {
+                if (selectedId != null) {
+                    const it = items.get(selectedId);
+                    if (it) {
+                        const def = CATALOG[it.type];
+                        ring.position.set(it.x, .03, it.z);
+                        ring.rotation.y = -it.r * Math.PI / 180;
+                        ring.scale.set(def.w + .34, 1, def.d + .34);
+                    }
+                }
+            }
+
+            /* ============ UNDO ============ */
+            const undoStack = [];
+
+            function pushUndo(a) {
+                undoStack.push(a);
+                if (undoStack.length > 60) undoStack.shift();
+            }
+
+            function undo() {
+                const a = undoStack.pop();
+                if (!a) {
+                    toast('Nothing to undo');
+                    return;
+                }
+                if (a.t === 'add') removeItem(a.id, false);
+                else if (a.t === 'rem') {
+                    const it = addItem(a.data.type, a.data.x, a.data.z, a.data.r, false);
+                    select(it.id);
+                } else if (a.t === 'mv') {
+                    const it = items.get(a.id);
+                    if (it) {
+                        it.x = a.from.x;
+                        it.z = a.from.z;
+                        it.r = a.from.r;
+                        it.group.position.set(it.x, 0, it.z);
+                        it.group.rotation.y = -it.r * Math.PI / 180;
+                        refreshRing();
+                        recompute();
+                    }
+                }
+            }
+
+            /* ============ INPUT ============ */
+            const ray = new THREE.Raycaster(),
+                ndc = new THREE.Vector2(),
+                floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+            let mode = 'plan',
+                tool = null,
+                ghost = null,
+                ghostRot = 0,
+                ghostPos = {
+                    x: 0,
+                    z: 0
+                },
+                ghostOK = true;
+            let dragging = false,
+                dragOff = {
+                    x: 0,
+                    z: 0
+                },
+                dragMoved = false,
+                dragFrom = null;
+            let pDown = null,
+                userTouched = false;
+
+            function setNDC(e) {
+                const r = renderer.domElement.getBoundingClientRect();
+                ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+                ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1;
+            }
+
+            function floorHit() {
+                ray.setFromCamera(ndc, camera);
+                const v = new THREE.Vector3();
+                return ray.ray.intersectPlane(floorPlane, v) ? v : null;
+            }
+
+            function itemHit() {
+                ray.setFromCamera(ndc, camera);
+                const hits = ray.intersectObjects(itemsG.children, true);
+                for (const h of hits) {
+                    let o = h.object;
+                    while (o && o.parent !== itemsG) o = o.parent;
+                    if (o) {
+                        for (const it of items.values())
+                            if (it.group === o) return it;
+                    }
+                }
+                return null;
+            }
+
+            function startTool(type) {
+                cancelTool(false);
+                tool = type;
+                ghostRot = 0;
+                ghost = buildGroup2(type);
+                ghost.traverse(o => {
+                    if (o.isMesh) {
+                        o.material = ghostMat;
+                        o.castShadow = false;
+                    }
+                });
+                ghost.visible = false;
+                scene.add(ghost);
+                document.querySelectorAll('.irow').forEach(r => r.classList.toggle('active', r.dataset.type === type));
+                select(null);
+                const def = CATALOG[type];
+                $('hint').innerHTML = `Placing <b>${def.name}</b> — click to drop · <kbd>R</kbd> rotate · <kbd>Esc</kbd> done`;
+                $('hint').style.display = 'block';
+                controls.mouseButtons.LEFT = -1;
+                controls.mouseButtons.RIGHT = THREE.MOUSE.PAN;
+                hideWelcome();
+            }
+
+            function cancelTool(resetUI = true) {
+                if (ghost) {
+                    scene.remove(ghost);
+                    ghost = null;
+                }
+                tool = null;
+                if (resetUI) {
+                    document.querySelectorAll('.irow').forEach(r => r.classList.remove('active'));
+                    $('hint').style.display = 'none';
+                    applyMouseButtons();
+                }
+            }
+
+            function applyMouseButtons() {
+                if (tool) return;
+                controls.mouseButtons.LEFT = (mode === 'plan') ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE;
+                controls.mouseButtons.RIGHT = THREE.MOUSE.PAN;
+            }
+
+            renderer.domElement.addEventListener('pointerdown', e => {
+                userTouched = true;
+                setNDC(e);
+                pDown = {
+                    x: e.clientX,
+                    y: e.clientY
+                };
+                dragMoved = false;
+                if (tool || e.button !== 0) return;
+                const it = itemHit();
+                if (it) {
+                    dragging = true;
+                    dragMoved = false;
+                    dragFrom = {
+                        x: it.x,
+                        z: it.z,
+                        r: it.r
+                    };
+                    const f = floorHit();
+                    if (f) {
+                        dragOff.x = f.x - it.x;
+                        dragOff.z = f.z - it.z;
+                    }
+                    select(it.id);
+                    controls.enabled = false;
+                    renderer.domElement.style.cursor = 'grabbing';
+                }
+            });
+            renderer.domElement.addEventListener('pointermove', e => {
+                setNDC(e);
+                if (pDown && Math.hypot(e.clientX - pDown.x, e.clientY - pDown.y) > 6) dragMoved = true;
+                if (dragging && selectedId != null) {
+                    const f = floorHit();
+                    if (!f) return;
+                    const it = items.get(selectedId),
+                        def = CATALOG[it.type];
+                    const p = clampPos(def, f.x - dragOff.x, f.z - dragOff.z, it.r);
+                    const sx = Math.round(p.x * 4) / 4,
+                        sz = Math.round(p.z * 4) / 4;
+                    if (sx !== it.x || sz !== it.z) {
+                        it.x = sx;
+                        it.z = sz;
+                        it.group.position.set(sx, 0, sz);
+                        refreshRing();
+                    }
+                }
+            });
+            renderer.domElement.addEventListener('pointerup', e => {
+                const wasDrag = dragging;
+                dragging = false;
+                controls.enabled = !swing;
+                renderer.domElement.style.cursor = '';
+                if (wasDrag) {
+                    const it = items.get(selectedId);
+                    if (it && dragMoved && (it.x !== dragFrom.x || it.z !== dragFrom.z)) pushUndo({
+                        t: 'mv',
+                        id: it.id,
+                        from: dragFrom
+                    });
+                    pDown = null;
+                    return;
+                }
+                if (pDown && !dragMoved && e.button === 0) {
+                    if (tool) {
+                        const f = floorHit();
+                        if (f) {
+                            const def = CATALOG[tool];
+                            const p = clampPos(def, f.x, f.z, ghostRot);
+                            const it = addItem(tool, Math.round(p.x * 4) / 4, Math.round(p.z * 4) / 4, ghostRot);
+                            select(it.id);
+                        }
+                    } else {
+                        setNDC(e);
+                        const it = itemHit();
+                        select(it ? it.id : null);
+                    }
+                }
+                pDown = null;
+            });
+
+            addEventListener('keydown', e => {
+                if (e.target.tagName === 'INPUT') return;
+                const k = e.key.toLowerCase();
+                if ((e.ctrlKey || e.metaKey) && k === 'z') {
+                    e.preventDefault();
+                    undo();
+                    return;
+                }
+                if (k === 'escape') {
+                    if ($('export').classList.contains('open')) {
+                        closeExport();
+                        return;
+                    }
+                    if (tool) {
+                        cancelTool();
+                        return;
+                    }
+                    select(null);
+                    closePops();
+                    return;
+                }
+                if (k === 'r') {
+                    if (tool) ghostRot = (ghostRot + 45) % 360;
+                    else if (selectedId != null) {
+                        const it = items.get(selectedId);
+                        pushUndo({
+                            t: 'mv',
+                            id: it.id,
+                            from: {
+                                x: it.x,
+                                z: it.z,
+                                r: it.r
+                            }
+                        });
+                        it.r = (it.r + 45) % 360;
+                        it.group.rotation.y = -it.r * Math.PI / 180;
+                        refreshRing();
+                        recompute();
+                    }
+                }
+                if ((k === 'delete' || k === 'backspace') && selectedId != null) {
+                    e.preventDefault();
+                    removeItem(selectedId);
+                    toast('Item removed');
+                }
+                if (k === 'd' && selectedId != null && !tool) duplicateSel();
+                if (k === 'v') swingTo(mode === 'plan' ? 'p3d' : 'plan');
+            });
+
+            function duplicateSel() {
+                const it = items.get(selectedId);
+                if (!it) return;
+                const def = CATALOG[it.type];
+                const p = clampPos(def, it.x + .5, it.z + .5, it.r);
+                const n = addItem(it.type, Math.round(p.x * 4) / 4, Math.round(p.z * 4) / 4, it.r);
+                select(n.id);
+                toast(def.name + ' duplicated');
+            }
+            $('aRot').onclick = () => {
+                if (selectedId == null) return;
+                const it = items.get(selectedId);
+                pushUndo({
+                    t: 'mv',
+                    id: it.id,
+                    from: {
+                        x: it.x,
+                        z: it.z,
+                        r: it.r
+                    }
+                });
+                it.r = (it.r + 45) % 360;
+                it.group.rotation.y = -it.r * Math.PI / 180;
+                refreshRing();
+            };
+            $('aDup').onclick = duplicateSel;
+            $('aDel').onclick = () => {
+                if (selectedId != null) {
+                    removeItem(selectedId);
+                    toast('Item removed');
+                }
+            };
+            $('toolSelect').onclick = () => {
+                cancelTool();
+                select(null);
+            };
+
+            /* ============ CAMERA VIEWS ============ */
+            const VIEWS = {
+                plan: {
+                    theta: 0,
+                    phi: .03,
+                    fov: 24
+                },
+                p3d: {
+                    theta: -.55,
+                    phi: 1.04,
+                    fov: 42
+                }
+            };
+            const sph = new THREE.Spherical();
+            let swing = null,
+                planMix = 1,
+                planMixT = 1;
+
+            function fitRadius() {
+                return Math.max(room.W, room.D) * 1.18 + 5;
+            }
+
+            function swingTo(name) {
+                const v = VIEWS[name];
+                sph.setFromVector3(camera.position.clone().sub(controls.target));
+                let dT = v.theta - sph.theta;
+                dT = Math.atan2(Math.sin(dT), Math.cos(dT));
+                swing = {
+                    t: 0,
+                    dur: 1.15,
+                    from: {
+                        r: sph.radius,
+                        phi: sph.phi,
+                        theta: sph.theta,
+                        fov: camera.fov
+                    },
+                    toR: name === 'plan' ? fitRadius() + 2 : fitRadius(),
+                    toPhi: v.phi,
+                    toFov: v.fov,
+                    dT,
+                    name
+                };
+                controls.enabled = false;
+                planMixT = (name === 'plan') ? 1 : 0;
+                document.querySelectorAll('#viewSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === (name === 'plan' ? 'plan' : 'p3d')));
+                hideWelcome();
+            }
+            document.querySelectorAll('#viewSeg button').forEach(b => b.onclick = () => swingTo(b.dataset.v === 'plan' ? 'plan' : 'p3d'));
+
+            function applyModeConstraints() {
+                if (mode === 'plan') {
+                    controls.enableRotate = false;
+                } else {
+                    controls.enableRotate = true;
+                    controls.maxPolarAngle = 1.45;
+                }
+                applyMouseButtons();
+            }
+
+            /* ============ CAPACITY + COST ============ */
+            let seats = 0,
+                area = 0,
+                maxOcc = 0,
+                totals = {
+                    furn: 0,
+                    total: 0
+                };
+            const tick = {
+                seats: {
+                    v: 0,
+                    t: 0
+                },
+                total: {
+                    v: 0,
+                    t: 0
+                }
+            };
+
+            function bump(el) {
+                el.classList.remove('bump');
+                void el.offsetWidth;
+                el.classList.add('bump');
+            }
+
+            function recompute() {
+                area = room.W * room.D;
+                seats = 0;
+                const counts = {};
+                let furn = 0;
+                items.forEach(it => {
+                    const d = CATALOG[it.type];
+                    seats += d.seats;
+                    counts[it.type] = (counts[it.type] || 0) + 1;
+                    furn += d.cost;
+                });
+                maxOcc = Math.floor(area / 1.4);
+                const flooring = area * 165,
+                    lighting = area * 88,
+                    install = furn * .08;
+                const sub = furn + flooring + lighting + install,
+                    conting = sub * .10,
+                    total = sub + conting;
+                totals = {
+                    furn,
+                    flooring,
+                    lighting,
+                    install,
+                    conting,
+                    total
+                };
+                // HUD
+                if (tick.seats.t !== seats) bump($('seatsN'));
+                tick.seats.t = seats;
+                tick.total.t = total;
+                $('seatsMax').textContent = '/ ' + maxOcc + ' max occupancy';
+                $('meterFill').style.width = clamp(seats / maxOcc, 0, 1) * 100 + '%';
+                $('meter').classList.toggle('over', seats > maxOcc);
+                $('m2seat').textContent = seats ? (area / seats).toFixed(1) + ' m² / seat' : '— m² / seat';
+                $('p100').textContent = (seats / area * 100).toFixed(1) + ' seats / 100 m²';
+                $('roomLabel').textContent = (tpl.name + ' · ' + room.W + '×' + room.D + ' M · ' + area + ' M²').toUpperCase();
+                const v = $('verdict'),
+                    vt = $('verdictTxt');
+                let bad = false,
+                    txt;
+                if (!seats) txt = 'No seating placed yet';
+                else if (seats > maxOcc) {
+                    bad = true;
+                    txt = 'Over occupant load — remove seats';
+                } else {
+                    const d = area / seats;
+                    txt = d < 2 ? 'Dense layout — watch egress' : d < 5 ? 'Efficient seating' : 'Comfortable spacing';
+                }
+                vt.textContent = txt;
+                v.classList.toggle('bad', bad);
+                $('egressTxt').textContent = '2 exits · ' + egressLen.toFixed(0) + ' m travel';
+                // cost panel
+                const body = $('costBody');
+                let html = '';
+                const keys = Object.keys(counts);
+                if (!keys.length) html = '<div class="crow"><span class="l"><b>Place items to build an estimate.</b><span>Furniture, finishes and fit-out</span></span></div>';
+                keys.sort((a, b) => counts[b] * CATALOG[b].cost - counts[a] * CATALOG[a].cost).forEach(t => {
+                    const d = CATALOG[t],
+                        q = counts[t];
+                    html += `<div class="crow"><span class="l"><b>${d.name}</b><span>${q} × ${fmt$(d.cost)}</span></span><span class="r">${fmt$(q*d.cost)}</span></div>`;
+                });
+                html += `<div class="crow fix"><span class="l"><b>Flooring &amp; finishes</b><span>${area} m² × $165</span></span><span class="r">${fmt$(flooring)}</span></div>`;
+                html += `<div class="crow fix"><span class="l"><b>Lighting &amp; electrical</b><span>${area} m² × $88</span></span><span class="r">${fmt$(lighting)}</span></div>`;
+                html += `<div class="crow fix"><span class="l"><b>Delivery &amp; install</b><span>8% of furniture</span></span><span class="r">${fmt$(install)}</span></div>`;
+                html += `<div class="crow fix"><span class="l"><b>Contingency</b><span>10%</span></span><span class="r">${fmt$(conting)}</span></div>`;
+                body.innerHTML = html;
+            }
+
+            /* ============ FIRE SAFETY ============ */
+            let fireOn = false,
+                fireFade = 0,
+                lightDim = 0;
+            $('btnFire').onclick = () => {
+                fireOn = !fireOn;
+                $('btnFire').classList.toggle('fire-on', fireOn);
+                toast(fireOn ? 'Egress paths shown — flow toward exits' : 'Egress paths hidden');
+            };
+
+            /* ============ UI: toasts, popovers, templates, brand ============ */
+            function toast(msg) {
+                const t = document.createElement('div');
+                t.className = 'toast';
+                t.textContent = msg;
+                $('toasts').appendChild(t);
+                setTimeout(() => {
+                    t.style.opacity = '0';
+                    t.style.transition = 'opacity .4s';
+                    setTimeout(() => t.remove(), 400);
+                }, 2200);
+            }
+
+            function closePops() {
+                document.querySelectorAll('.pop').forEach(p => p.classList.remove('open'));
+            }
+            $('btnTpl').onclick = e => {
+                e.stopPropagation();
+                const p = $('popTpl');
+                const o = !p.classList.contains('open');
+                closePops();
+                if (o) p.classList.add('open');
+            };
+            $('btnBrand').onclick = e => {
+                e.stopPropagation();
+                const p = $('popBrand');
+                const o = !p.classList.contains('open');
+                closePops();
+                if (o) p.classList.add('open');
+            };
+            document.addEventListener('click', e => {
+                if (!e.target.closest('.anchor')) closePops();
+                if (!e.target.closest('#library') && innerWidth <= 900) $('library').classList.remove('open');
+            });
+
+            // template cards
+            const tplGrid = $('tplGrid');
+            Object.entries(TEMPLATES).forEach(([k, t]) => {
+                const b = document.createElement('button');
+                b.className = 'tcard';
+                b.dataset.k = k;
+                b.innerHTML = `<div class="ph"><img src="https://picsum.photos/seed/${t.seed}/420/260.jpg" alt="${t.name} interior"></div>
+    <div class="meta"><b>${t.name}</b><span>${t.W} × ${t.D} m · ${t.W*t.D} m² · ${t.blurb}</span></div>`;
+                b.onclick = () => {
+                    applyTemplate(k);
+                    closePops();
+                };
+                tplGrid.appendChild(b);
+            });
+
+            function markCurrentTpl() {
+                document.querySelectorAll('.tcard').forEach(c => c.classList.toggle('now', c.dataset.k === tplKey));
+            }
+
+            function applyTemplate(k) {
+                tplKey = k;
+                tpl = TEMPLATES[k];
+                room.W = tpl.W;
+                room.D = tpl.D;
+                [...items.keys()].forEach(id => removeItem(id, false));
+                undoStack.length = 0;
+                buildRoom();
+                tpl.items().forEach(o => addItem(o.t, o.x, o.z, o.r, false));
+                markCurrentTpl();
+                recompute();
+                // refit camera radius softly
+                sph.setFromVector3(camera.position.clone().sub(controls.target));
+                const target = mode === 'plan' ? fitRadius() + 2 : fitRadius();
+                swing = {
+                    t: 0,
+                    dur: .9,
+                    from: {
+                        r: sph.radius,
+                        phi: sph.phi,
+                        theta: sph.theta,
+                        fov: camera.fov
+                    },
+                    toR: target,
+                    toPhi: sph.phi,
+                    toFov: camera.fov,
+                    dT: 0,
+                    name: mode
+                };
+                controls.enabled = false;
+                toast(tpl.name + ' template loaded — ' + tpl.W + ' × ' + tpl.D + ' m');
+                hideWelcome();
+            }
+
+            // brand swatches
+            ['#C4502B', '#2F5D46', '#8A2F2B', '#C08A1E', '#1F4E5F', '#A93A6B', '#33302B'].forEach(c => {
+                const b = document.createElement('button');
+                b.style.background = c;
+                b.title = c;
+                b.onclick = () => setBrand(c);
+                $('swatches').appendChild(b);
+            });
+            $('brandInput').addEventListener('input', e => setBrand(e.target.value));
+
+            $('btnUndo').onclick = undo;
+            $('btnCost').onclick = () => $('cost').classList.toggle('open');
+            $('costClose').onclick = () => $('cost').classList.remove('open');
+
+            function hideWelcome() {
+                $('welcome').classList.add('hide');
+            }
+            $('btnGotIt').onclick = hideWelcome;
+
+            /* ============ LIBRARY DOM ============ */
+            const chipsEl = $('chips');
+            let curCat = 'All';
+            CATS.forEach(c => {
+                const b = document.createElement('button');
+                b.className = 'chip' + (c === 'All' ? ' on' : '');
+                b.textContent = c;
+                b.onclick = () => {
+                    curCat = c;
+                    document.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === b));
+                    renderList();
+                };
+                chipsEl.appendChild(b);
+            });
+
+            function renderList() {
+                const list = $('itemList');
+                list.innerHTML = '';
+                Object.entries(CATALOG).forEach(([t, d]) => {
+                    if (curCat !== 'All' && d.cat !== curCat) return;
+                    const r = document.createElement('div');
+                    r.className = 'irow';
+                    r.dataset.type = t;
+                    r.innerHTML = `<img alt=""><span><span class="nm">${d.name}</span><br><span class="ct">${d.cat.toUpperCase()}${d.seats?' · '+d.seats+' SEAT'+(d.seats>1?'S':''):''}</span></span><span class="pr">${fmt$(d.cost)}</span>`;
+                    r.onclick = () => {
+                        if (tool === t) cancelTool();
+                        else startTool(t);
+                    };
+                    list.appendChild(r);
+                });
+                renderThumbs();
+            }
+
+            /* ============ EXPORT SHEET ============ */
+            const SW = 1684,
+                SH = 1190;
+            const sheet = $('sheet');
+            sheet.width = SW;
+            sheet.height = SH;
+            let sheetAnim = null,
+                sheetData = null;
+            $('btnExport').onclick = openExport;
+            $('btnCloseExp').onclick = closeExport;
+
+            function closeExport() {
+                $('export').classList.remove('open');
+                if (sheetAnim) cancelAnimationFrame(sheetAnim);
+                sheetAnim = null;
+            }
+
+            function openExport() {
+                closePops();
+                sheetData = {
+                    items: [...items.values()].map(i => ({
+                        def: CATALOG[i.type],
+                        x: i.x,
+                        z: i.z,
+                        r: i.r
+                    })),
+                    brand: brandHex,
+                    tplName: tpl.name,
+                    date: new Date().toLocaleDateString('en-GB', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric'
+                    })
+                };
+                $('export').classList.add('open');
+                $('btnPdf').disabled = true;
+                $('expStatus').textContent = 'building sheet…';
+                const ctx = sheet.getContext('2d');
+                const t0 = performance.now();
+
+                function frame(now) {
+                    const t = now - t0;
+                    renderSheet(ctx, sheetData, t);
+                    if (t < 3600) sheetAnim = requestAnimationFrame(frame);
+                    else {
+                        sheetAnim = null;
+                        $('btnPdf').disabled = false;
+                        $('expStatus').textContent = 'ready · A3 landscape · scale 1:50';
+                    }
+                }
+                sheetAnim = requestAnimationFrame(frame);
+            }
+            $('btnPdf').onclick = () => {
+                try {
+                    const pdf = new window.jspdf.jsPDF({
+                        orientation: 'landscape',
+                        unit: 'mm',
+                        format: 'a3'
+                    });
+                    pdf.addImage(sheet.toDataURL('image/jpeg', .92), 'JPEG', 0, 0, 420, 297);
+                    pdf.save('fitout-' + tplKey + '-A101.pdf');
+                    toast('PDF downloaded');
+                } catch (err) {
+                    const a = document.createElement('a');
+                    a.href = sheet.toDataURL('image/png');
+                    a.download = 'fitout-layout.png';
+                    a.click();
+                    toast('PDF library unavailable — downloaded PNG instead');
+                }
+            };
+
+            function st(g, txt, x, y, font, col, align) {
+                g.font = font;
+                g.fillStyle = col;
+                g.textAlign = align || 'left';
+                g.textBaseline = 'alphabetic';
+                g.fillText(txt, x, y);
+            }
+
+            function renderSheet(g, S, t) {
+                const INK = '#3A362C',
+                    FAINT = 'rgba(58,54,44,.5)',
+                    LINE = 'rgba(58,54,44,.28)';
+                g.clearRect(0, 0, SW, SH);
+                g.fillStyle = '#FBF8F1';
+                g.fillRect(0, 0, SW, SH);
+                const p1 = clamp(t / 350, 0, 1),
+                    p2 = clamp((t - 350) / 350, 0, 1);
+                // frame
+                if (p1 > 0) {
+                    g.globalAlpha = p1;
+                    g.strokeStyle = INK;
+                    g.lineWidth = 3;
+                    g.strokeRect(20, 20, SW - 40, SH - 40);
+                    g.lineWidth = 1;
+                    g.strokeRect(32, 32, SW - 64, SH - 64);
+                    g.globalAlpha = 1;
+                }
+                // header
+                if (t > 200) {
+                    const a = clamp((t - 200) / 300, 0, 1);
+                    g.globalAlpha = a;
+                    st(g, 'FITOUT', 60, 96, '700 46px "Space Grotesk"', INK);
+                    st(g, S.tplName.toUpperCase() + ' — COMMERCIAL SPACE PLAN', 60, 130, '500 15px "IBM Plex Mono"', INK);
+                    st(g, 'SHEET A-101 · SCALE 1:50 · ' + S.date, 60, 154, '400 12px "IBM Plex Mono"', FAINT);
+                    g.globalAlpha = 1;
+                }
+                // plan region
+                const RX = 60,
+                    RY = 185,
+                    RW = SW - 460,
+                    RY2 = SH - 190,
+                    RH = RY2 - RY;
+                if (p2 > 0) {
+                    g.globalAlpha = p2 * .8;
+                    // region grid
+                    g.strokeStyle = 'rgba(58,54,44,.1)';
+                    g.lineWidth = 1;
+                    for (let x = RX; x <= RX + RW; x += RW / 24) {
+                        g.beginPath();
+                        g.moveTo(x, RY);
+                        g.lineTo(x, RY2);
+                        g.stroke();
+                    }
+                    for (let y = RY; y <= RY2; y += RH / 16) {
+                        g.beginPath();
+                        g.moveTo(RX, y);
+                        g.lineTo(RX + RW, y);
+                        g.stroke();
+                    }
+                    g.globalAlpha = 1;
+                    const s = Math.min(RW / (room.W + 3), RH / (room.D + 3));
+                    const cx = RX + RW / 2,
+                        cy = RY + RH / 2;
+                    const wx = x => cx + x * s,
+                        wz = z => cy + z * s;
+                    // walls (poché) with door gaps
+                    const th = Math.max(3, .14 * s),
+                        hW = room.W / 2,
+                        hD = room.D / 2;
+                    g.fillStyle = INK;
+                    const gaps = [{
+                        a: -hW,
+                        b: tpl.back.x - tpl.back.w / 2,
+                        z: -hD
+                    }, {
+                        a: tpl.back.x + tpl.back.w / 2,
+                        b: hW,
+                        z: -hD
+                    }, {
+                        a: -hW,
+                        b: tpl.ent.x - tpl.ent.w / 2,
+                        z: hD
+                    }, {
+                        a: tpl.ent.x + tpl.ent.w / 2,
+                        b: hW,
+                        z: hD
+                    }];
+                    gaps.forEach(gp => {
+                        if (gp.b > gp.a) g.fillRect(wx(gp.a), wz(gp.z) - th / 2, (gp.b - gp.a) * s, th);
+                    });
+                    g.fillRect(wx(-hW) - th / 2, wz(-hD), th, room.D * s);
+                    g.fillRect(wx(hW) - th / 2, wz(-hD), th, room.D * s);
+                    // door swings
+                    g.strokeStyle = FAINT;
+                    g.lineWidth = 1.4;
+                    [
+                        [tpl.ent, hD, 1],
+                        [tpl.back, -hD, -1]
+                    ].forEach(([e, z, sgn]) => {
+                        const hx = wx(e.x - e.w / 2),
+                            hy = wz(z);
+                        g.beginPath();
+                        g.moveTo(hx, hy);
+                        g.lineTo(hx + e.w * s * .95, hy + sgn * e.w * s * .95 * .0);
+                        g.stroke();
+                        g.beginPath();
+                        g.moveTo(hx, hy);
+                        g.lineTo(hx + e.w * s * .9, hy);
+                        g.stroke();
+                        g.beginPath();
+                        g.arc(hx, hy, e.w * s * .9, sgn > 0 ? 0 : Math.PI, sgn > 0 ? Math.PI / 2 : Math.PI * 1.5, sgn < 0);
+                        g.stroke();
+                    });
+                    // furniture — pop-in sequence
+                    const n = S.items.length,
+                        stag = n ? Math.min(30, 1150 / n) : 0;
+                    S.items.forEach((it, i) => {
+                        const lp = clamp((t - 720 - i * stag) / 170, 0, 1);
+                        if (lp <= 0) return;
+                        const e = easeOB(lp),
+                            sc = 1 + .18 * (1 - e);
+                        g.globalAlpha = lp;
+                        drawPlan(g, it.def, wx(it.x), wz(it.z), it.r, s * sc, INK, S.brand);
+                        g.globalAlpha = 1;
+                    });
+                    // egress arrows (always on the safety sheet)
+                    if (t > 1900) {
+                        const a = clamp((t - 1900) / 380, 0, 1);
+                        g.globalAlpha = a;
+                        g.strokeStyle = '#1E8A55';
+                        g.fillStyle = '#1E8A55';
+                        g.lineWidth = 2;
+                        g.setLineDash([10, 8]);
+                        const paths = [
+                            [{
+                                x: 0,
+                                z: .45
+                            }, {
+                                x: tpl.ent.x,
+                                z: .45
+                            }, {
+                                x: tpl.ent.x,
+                                z: hD - .45
+                            }],
+                            [{
+                                x: 0,
+                                z: -.45
+                            }, {
+                                x: tpl.back.x,
+                                z: -.45
+                            }, {
+                                x: tpl.back.x,
+                                z: -hD + .45
+                            }]
+                        ];
+                        paths.forEach(pp => {
+                            g.beginPath();
+                            pp.forEach((pt, i) => {
+                                i ? g.lineTo(wx(pt.x), wz(pt.z)) : g.moveTo(wx(pt.x), wz(pt.z));
+                            });
+                            g.stroke();
+                            g.setLineDash([]);
+                            const last = pp[pp.length - 1],
+                                prev = pp[pp.length - 2];
+                            const ang = Math.atan2(wz(last.z) - wz(prev.z), wx(last.x) - wx(prev.x));
+                            g.save();
+                            g.translate(wx(last.x), wz(last.z));
+                            g.rotate(ang);
+                            g.beginPath();
+                            g.moveTo(-10, -6);
+                            g.lineTo(2, 0);
+                            g.lineTo(-10, 6);
+                            g.closePath();
+                            g.fill();
+                            g.restore();
+                            g.setLineDash([10, 8]);
+                        });
+                        g.setLineDash([]);
+                        st(g, 'EXIT', wx(tpl.ent.x), wz(hD) + 28, '500 12px "IBM Plex Mono"', '#1E8A55', 'center');
+                        st(g, 'EXIT', wx(tpl.back.x), wz(-hD) - 14, '500 12px "IBM Plex Mono"', '#1E8A55', 'center');
+                        g.globalAlpha = 1;
+                    }
+                    // dimensions
+                    if (t > 2050) {
+                        const a = clamp((t - 2050) / 320, 0, 1);
+                        g.globalAlpha = a;
+                        g.strokeStyle = INK;
+                        g.fillStyle = INK;
+                        g.lineWidth = 1.4;
+                        const yd = wz(hD) + .85 * s,
+                            xd = wx(-hW) - .85 * s;
+                        g.beginPath();
+                        g.moveTo(wx(-hW), yd);
+                        g.lineTo(wx(hW), yd);
+                        g.moveTo(wx(-hW), yd - 8);
+                        g.lineTo(wx(-hW), yd + 8);
+                        g.moveTo(wx(hW), yd - 8);
+                        g.lineTo(wx(hW), yd + 8);
+                        g.stroke();
+                        st(g, room.W.toFixed(1) + ' m', wx(0), yd - 8, '500 15px "IBM Plex Mono"', INK, 'center');
+                        g.beginPath();
+                        g.moveTo(xd, wz(-hD));
+                        g.lineTo(xd, wz(hD));
+                        g.moveTo(xd - 8, wz(-hD));
+                        g.lineTo(xd + 8, wz(-hD));
+                        g.moveTo(xd - 8, wz(hD));
+                        g.lineTo(xd + 8, wz(hD));
+                        g.stroke();
+                        g.save();
+                        g.translate(xd - 8, wz(0));
+                        g.rotate(-Math.PI / 2);
+                        st(g, room.D.toFixed(1) + ' m', 0, 0, '500 15px "IBM Plex Mono"', INK, 'center');
+                        g.restore();
+                        g.globalAlpha = 1;
+                    }
+                    // scale bar
+                    if (t > 2200) {
+                        const a = clamp((t - 2200) / 300, 0, 1);
+                        g.globalAlpha = a;
+                        g.fillStyle = INK;
+                        const bx = RX,
+                            by = RY2 + 34;
+                        for (let i = 0; i < 4; i++) {
+                            g.fillRect(bx + i * 25, by, 25, 7);
+                            if (i % 2 === 0) continue;
+                            g.globalAlpha = a * .25;
+                            g.fillRect(bx + i * 25, by, 25, 7);
+                            g.globalAlpha = a;
+                        }
+                        st(g, '0', bx, by + 24, '400 11px "IBM Plex Mono"', FAINT);
+                        st(g, '2 m', bx + 100, by + 24, '400 11px "IBM Plex Mono"', FAINT, 'right');
+                        g.globalAlpha = 1;
+                    }
+                }
+                // title block
+                if (t > 600) {
+                    const a = clamp((t - 600) / 400, 0, 1);
+                    g.globalAlpha = a;
+                    const TX = SW - 360,
+                        TW = 310;
+                    g.strokeStyle = INK;
+                    g.lineWidth = 1.5;
+                    g.strokeRect(TX, 60, TW, SH - 120);
+                    let y = 110;
+                    g.strokeStyle = LINE;
+                    g.beginPath();
+                    g.moveTo(TX, y - 28);
+                    g.lineTo(TX + TW, y - 28);
+                    g.stroke();
+                    st(g, 'PROJECT', TX + 20, y - 40, '500 10px "IBM Plex Mono"', FAINT);
+                    st(g, S.tplName + ' fit-out', TX + 20, y - 14, '600 21px "Space Grotesk"', INK);
+                    y += 42;
+                    st(g, 'BRAND COLOR', TX + 20, y - 22, '500 10px "IBM Plex Mono"', FAINT);
+                    g.fillStyle = S.brand;
+                    g.fillRect(TX + 20, y - 12, 30, 30);
+                    g.strokeStyle = INK;
+                    g.lineWidth = 1;
+                    g.strokeRect(TX + 20, y - 12, 30, 30);
+                    st(g, S.brand.toUpperCase(), TX + 62, y + 9, '500 15px "IBM Plex Mono"', INK);
+                    y += 46;
+                    // stats rows
+                    const m2seat = seats ? (area / seats).toFixed(1) : '—';
+                    const rows = [
+                        ['FLOOR AREA', area + ' m²'],
+                        ['SEATS PLACED', seats + ''],
+                        ['AREA PER SEAT', m2seat + ' m²'],
+                        ['OCCUPANT LOAD', 'max ' + maxOcc + ''],
+                        ['EXITS / TRAVEL', '2 · ' + egressLen.toFixed(0) + ' m'],
+                        ['SEATS / 100 M²', (seats / area * 100).toFixed(1)]
+                    ];
+                    g.strokeStyle = LINE;
+                    g.beginPath();
+                    g.moveTo(TX, y - 30);
+                    g.lineTo(TX + TW, y - 30);
+                    g.stroke();
+                    st(g, 'CAPACITY & SAFETY', TX + 20, y - 10, '500 10px "IBM Plex Mono"', FAINT);
+                    rows.forEach(r => {
+                        st(g, r[0], TX + 20, y + 16, '400 12px "IBM Plex Mono"', FAINT);
+                        st(g, r[1], TX + TW - 20, y + 16, '500 14px "IBM Plex Mono"', INK, 'right');
+                        y += 26;
+                    });
+                    y += 14;
+                    g.strokeStyle = LINE;
+                    g.beginPath();
+                    g.moveTo(TX, y - 26);
+                    g.lineTo(TX + TW, y - 26);
+                    g.stroke();
+                    st(g, 'COST ESTIMATE', TX + 20, y - 6, '500 10px "IBM Plex Mono"', FAINT);
+                    const crows = [
+                        ['Furniture', totals.furn],
+                        ['Finishes & lighting', totals.flooring + totals.lighting],
+                        ['Install & contingency', totals.install + totals.conting]
+                    ];
+                    crows.forEach(r => {
+                        st(g, r[0], TX + 20, y + 20, '400 12px "IBM Plex Mono"', FAINT);
+                        st(g, fmt$(r[1] * cp(t, y)), TX + TW - 20, y + 20, '500 13px "IBM Plex Mono"', INK, 'right');
+                        y += 26;
+                    });
+                    y += 16;
+                    st(g, 'TOTAL', TX + 20, y + 8, '600 15px "Space Grotesk"', INK);
+                    st(g, fmt$(totals.total * cp(t, y)), TX + TW - 20, y + 10, '700 24px "Space Grotesk"', INK, 'right');
+                    y += 34;
+                    g.strokeStyle = LINE;
+                    g.beginPath();
+                    g.moveTo(TX + 20, y);
+                    g.lineTo(TX + TW - 20, y);
+                    g.stroke();
+                    st(g, 'Indicative budgetary pricing', TX + 20, y + 20, '400 10px "IBM Plex Mono"', FAINT);
+                    g.globalAlpha = 1;
+                }
+                // stamp
+                if (t > 3100) {
+                    const a = clamp((t - 3100) / 400, 0, 1);
+                    g.save();
+                    g.globalAlpha = a * .9;
+                    g.translate(SW - 190, SH - 120);
+                    g.rotate(-.12);
+                    g.strokeStyle = S.brand;
+                    g.lineWidth = 3;
+                    g.beginPath();
+                    g.arc(0, 0, 62, 0, 7);
+                    g.stroke();
+                    g.lineWidth = 1.2;
+                    g.beginPath();
+                    g.arc(0, 0, 52, 0, 7);
+                    g.stroke();
+                    st(g, 'CONCEPT', 0, -6, '700 17px "Space Grotesk"', S.brand, 'center');
+                    st(g, 'ESTIMATE', 0, 14, '700 17px "Space Grotesk"', S.brand, 'center');
+                    st(g, S.date, 0, 34, '400 9px "IBM Plex Mono"', S.brand, 'center');
+                    g.restore();
+                }
+            }
+
+            function cp(t, y) {
+                return clamp((t - 2350) / 700, 0, 1);
+            } // count-up progress for numbers
+
+            /* ============ MAIN LOOP ============ */
+            let last = performance.now();
+
+            function loop(now) {
+                requestAnimationFrame(loop);
+                const dt = Math.min(.05, (now - last) / 1000);
+                last = now;
+                // camera swing
+                if (swing) {
+                    swing.t = Math.min(1, swing.t + dt / swing.dur);
+                    const e = easeIO(swing.t);
+                    sph.set(lerp(swing.from.r, swing.toR, e), lerp(swing.from.phi, swing.toPhi, e), swing.from.theta + swing.dT * e);
+                    camera.fov = lerp(swing.from.fov, swing.toFov, e);
+                    camera.updateProjectionMatrix();
+                    camera.position.setFromSpherical(sph).add(controls.target);
+                    camera.lookAt(controls.target);
+                    if (swing.t >= 1) {
+                        mode = swing.name;
+                        applyModeConstraints();
+                        swing = null;
+                        controls.enabled = true;
+                    }
+                } else if (controls.enabled) {
+                    controls.update();
+                }
+                // plan dim fade
+                planMix = lerp(planMix, planMixT, 1 - Math.pow(.001, dt));
+                dimMats.forEach(m => m.opacity = planMix * .95);
+                // fire fade + light dim
+                fireFade = lerp(fireFade, fireOn ? 1 : 0, 1 - Math.pow(.004, dt));
+                ribbons.mats.forEach(m => {
+                    m.uniforms.uT.value += dt * .85;
+                    m.uniforms.uFade.value = fireFade;
+                });
+                fireMats.forEach(m => m.opacity = fireFade);
+                lightDim = lerp(lightDim, fireOn ? .55 : 0, 1 - Math.pow(.004, dt));
+                hemi.intensity = .85 * (1 - lightDim * .5);
+                dir.intensity = .8 * (1 - lightDim * .5);
+                // brand tween
+                if (brandT < 1) {
+                    brandT = Math.min(1, brandT + dt / .35);
+                    applyBrandColors();
+                }
+                // tickers
+                [
+                    ['seats', tick.seats, 1, 'seatsN'],
+                    ['total', tick.total, 1, 'totalN']
+                ].forEach(([k, o, step, el]) => {
+                    if (Math.abs(o.t - o.v) > .4) {
+                        o.v += (o.t - o.v) * Math.min(1, dt * 9);
+                        if (Math.abs(o.t - o.v) <= .4) o.v = o.t;
+                        $(el).textContent = k === 'seats' ? Math.round(o.v) : fmt$(o.v);
+                    }
+                });
+                // ghost follow
+                if (ghost) {
+                    const f = floorHit();
+                    if (f) {
+                        const def = CATALOG[tool];
+                        const p = clampPos(def, f.x, f.z, ghostRot);
+                        ghostPos = {
+                            x: Math.round(p.x * 4) / 4,
+                            z: Math.round(p.z * 4) / 4
+                        };
+                        ghost.visible = true;
+                        ghost.position.set(ghostPos.x, 0, ghostPos.z);
+                        ghost.rotation.y = -ghostRot * Math.PI / 180;
+                    } else ghost.visible = false;
+                } else if (!dragging && mode !== 'swing') {
+                    // hover cursor
+                    const over = itemHit();
+                    renderer.domElement.style.cursor = over ? 'grab' : '';
+                }
+                renderer.render(scene, camera);
+            }
+
+            /* ============ INIT ============ */
+            renderList();
+            markCurrentTpl();
+            buildRoom();
+            tpl.items().forEach(o => addItem(o.t, o.x, o.z, o.r, false));
+            recompute();
+            resize();
+            applyModeConstraints();
+            // start top-down: the plan is the hero, then swing into 3D
+            sph.set(fitRadius() + 2, .03, 0);
+            camera.position.setFromSpherical(sph).add(controls.target);
+            camera.fov = 24;
+            camera.updateProjectionMatrix();
+            camera.lookAt(controls.target);
+            lucide.createIcons();
+            setTimeout(() => {
+                if (!userTouched) swingTo('p3d');
+            }, 1400);
+            document.fonts && document.fonts.ready.then(() => buildRoom()); // redraw dim labels with loaded mono font
+            loop(performance.now());
+        })();
+    </script>
+</body>
+
+</html>
